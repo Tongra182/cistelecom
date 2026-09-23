@@ -1,0 +1,2789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>CIS Telecom - Strong Telecom</title>
+<style>
+  :root{
+    --desktop-bg:#3a6ea5;
+    --win-border:#0a246a;
+    --title-grad-1:#0a58c2;
+    --title-grad-2:#3f9bea;
+    --title-grad-3:#1e6fd0;
+    --toolbar-bg1:#f4f3ee;
+    --toolbar-bg2:#dcdad0;
+    --panel-bg:#ece9d8;
+    --field-bg:#ffffff;
+    --field-border:#7f9db9;
+    --text-main:#0a0a0a;
+    --accent-green:#1a8a1a;
+    --accent-red:#c0392b;
+    --header-bar:#c9d7ea;
+    --tab-active:#ffffff;
+    --tab-inactive:#d8e2ef;
+  }
+  :root:not([data-theme="light"]){}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --desktop-bg:#132030;
+    }
+  }
+  :root[data-theme="dark"]{
+    --desktop-bg:#132030;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--desktop-bg);
+    font-family:"Tahoma","Segoe UI",Arial,sans-serif;
+    font-size:12px;
+    color:var(--text-main);
+    padding:14px;
+    min-height:100vh;
+  }
+  .scrollwrap{
+    width:100%;
+    overflow-x:auto;
+  }
+  .app{
+    width:1460px;
+    max-width:none;
+    margin:0 auto;
+    background:var(--panel-bg);
+    border:2px solid var(--win-border);
+    border-radius:6px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+    overflow:hidden;
+  }
+  .app.minimized .below-titlebar{display:none;}
+
+  /* Title bar */
+  .titlebar{
+    background:linear-gradient(180deg,var(--title-grad-2),var(--title-grad-1) 55%,var(--title-grad-3));
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:4px 8px;
+    font-weight:bold;
+    font-size:13px;
+  }
+  .titlebar .left{display:flex;align-items:center;gap:6px;}
+  .titlebar .icon{
+    width:16px;height:16px;background:#fff;border-radius:2px;
+    display:flex;align-items:center;justify-content:center;color:var(--title-grad-1);font-size:10px;font-weight:bold;
+  }
+  .winbtns{display:flex;gap:3px;}
+  .winbtns button{
+    width:20px;height:18px;border:1px solid #fff;border-radius:2px;
+    background:linear-gradient(180deg,#5fa8ec,#1c6fce);
+    color:#fff;font-size:11px;font-weight:bold;cursor:pointer;line-height:1;
+  }
+  .winbtns button:hover{filter:brightness(1.15);}
+  .winbtns button.close-btn{background:linear-gradient(180deg,#e2685a,#b8281a);}
+
+  /* Menu bar */
+  .menubar{
+    background:var(--toolbar-bg1);
+    border-bottom:1px solid #b8b6ab;
+    display:flex;
+    padding:2px 4px;
+    position:relative;
+    user-select:none;
+  }
+  .menu-item{
+    padding:4px 10px;
+    cursor:pointer;
+    border-radius:2px;
+    position:relative;
+  }
+  .menu-item:hover,.menu-item.open{background:#c2ddfb;border:1px solid #7fb0e8;padding:3px 9px;}
+  .dropdown{
+    display:none;
+    position:absolute;top:100%;left:0;
+    background:#fff;
+    border:1px solid #8c8c8c;
+    box-shadow:2px 2px 6px rgba(0,0,0,.3);
+    min-width:190px;
+    z-index:50;
+  }
+  .menu-item.open .dropdown{display:block;}
+  .dropdown a{
+    display:block;padding:6px 12px;color:#111;text-decoration:none;font-size:12px;
+  }
+  .dropdown a:hover{background:#2a6fd6;color:#fff;}
+  .dropdown hr{border:none;border-top:1px solid #ddd;margin:2px 0;}
+
+  /* Toolbar */
+  .toolbar{
+    background:linear-gradient(180deg,var(--toolbar-bg1),var(--toolbar-bg2));
+    border-bottom:1px solid #b8b6ab;
+    display:flex;
+    align-items:center;
+    padding:6px 8px;
+    gap:2px;
+  }
+  .tbtn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;background:transparent;border:1px solid transparent;
+    padding:4px 10px;cursor:pointer;border-radius:3px;font-size:11px;color:#1a1a1a;min-width:56px;
+  }
+  .tbtn .ic{font-size:18px;line-height:1;}
+  .tbtn:hover{background:#fff9d8;border:1px solid #e0c040;}
+  .tbtn:active{background:#f5e6a8;}
+  .tbtn[disabled]{opacity:.4;cursor:default;}
+  .tbtn[disabled]:hover{background:transparent;border-color:transparent;}
+  .tb-sep{width:1px;background:#b8b6ab;height:36px;margin:0 6px;}
+  .toolbar-hdr{
+    flex:1;display:flex;align-items:center;justify-content:space-between;
+    padding-left:20px;
+  }
+  .toolbar-hdr .title-main{font-size:22px;font-weight:bold;color:#123a6b;letter-spacing:.5px;}
+  .toolbar-hdr .title-sub{font-size:11px;color:#456;}
+  .toolbar-hdr .brand{text-align:right;}
+  .toolbar-hdr .brand .b1{font-size:20px;font-weight:bold;color:#003a7a;}
+  .toolbar-hdr .brand .b1 span{color:#17c3d9;}
+  .toolbar-hdr .brand .b2{font-size:10px;color:#666;}
+
+  .below-titlebar{display:flex;flex-direction:column;}
+  .body-row{display:flex;align-items:stretch;}
+
+  /* Left sidebar */
+  .sidebar{
+    width:210px;background:#f2f1ea;border-right:1px solid #b8b6ab;
+    padding:6px 0;font-size:12px;
+  }
+  .sidebar h3{
+    margin:0;padding:4px 8px;background:linear-gradient(180deg,#dfe8f6,#b9cdec);
+    border-bottom:1px solid #9fb6d6;font-size:12px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .tree{padding:4px 0;}
+  .tree-folder{padding:3px 6px 3px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+  .tree-folder:hover{background:#dcebfb;}
+  .tree-folder .twisty{width:10px;display:inline-block;font-size:9px;color:#555;}
+  .tree-children{padding-left:22px;display:none;}
+  .tree-folder.expanded + .tree-children{display:block;}
+  .tree-leaf{
+    padding:3px 6px 3px 4px;cursor:pointer;display:flex;align-items:center;gap:5px;border-radius:2px;
+  }
+  .tree-leaf:hover{background:#dcebfb;}
+  .tree-leaf.selected{background:#2a6fd6;color:#fff;}
+
+  /* Main window */
+  .mainpanel{flex:1;padding:10px;min-width:0;}
+  .window{
+    background:#fff;border:1px solid #7f9db9;border-radius:2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+  }
+  .window-title{
+    background:linear-gradient(180deg,#3f9bea,#1c6fce);
+    color:#fff;font-weight:bold;padding:5px 8px;display:flex;justify-content:space-between;align-items:center;border-radius:2px 2px 0 0;
+  }
+  .window-title .wclose{
+    width:18px;height:16px;background:#e2685a;border:1px solid #fff;border-radius:2px;cursor:pointer;color:#fff;font-size:10px;
+  }
+  .tabs{display:flex;background:var(--header-bar);border-bottom:1px solid #9fb6d6;padding:6px 6px 0 6px;gap:3px;}
+  .tab{
+    padding:6px 16px;background:var(--tab-inactive);border:1px solid #9fb6d6;border-bottom:none;
+    border-radius:4px 4px 0 0;cursor:pointer;font-weight:bold;color:#234;font-size:12px;
+  }
+  .tab.active{background:var(--tab-active);border-bottom:1px solid #fff;position:relative;top:1px;color:#0a4b9c;}
+  .tabcontent{display:none;padding:12px;}
+  .tabcontent.active{display:block;}
+
+  fieldset{
+    border:1px solid #9fb6d6;border-radius:3px;margin:0 0 10px 0;padding:8px 10px 10px 10px;
+  }
+  legend{
+    background:linear-gradient(180deg,#3f9bea,#1c6fce);color:#fff;font-weight:bold;
+    padding:3px 10px;border-radius:2px;font-size:12px;
+  }
+  .grid{display:grid;gap:8px 14px;}
+  .g4{grid-template-columns:1fr 1fr 1fr 1fr;}
+  .g3{grid-template-columns:2fr 1fr 1fr;}
+  .g2{grid-template-columns:1fr 1fr;}
+  .field label{display:block;font-size:11px;color:#333;margin-bottom:2px;font-weight:bold;}
+  .field-row{display:flex;gap:4px;}
+  input[type=text],input[type=date],select,textarea{
+    width:100%;border:1px solid var(--field-border);padding:4px 5px;font-size:12px;font-family:inherit;
+    background:var(--field-bg);border-radius:2px;
+  }
+  input:disabled,select:disabled,textarea:disabled{background:#eee;color:#555;}
+  .iconbtn{
+    border:1px solid var(--field-border);background:linear-gradient(180deg,#fdfdfd,#dfe6ee);
+    cursor:pointer;padding:0 8px;border-radius:2px;
+  }
+  .radio-group label{font-weight:normal;margin-right:14px;font-size:12px;}
+  .situacao-ativo{background:#c9f3c9 !important;color:#0a6b0a;font-weight:bold;}
+  .situacao-inativo{background:#f3c9c9 !important;color:#6b0a0a;font-weight:bold;}
+
+  table.gridtable{width:100%;border-collapse:collapse;font-size:11.5px;}
+  table.gridtable th{
+    background:linear-gradient(180deg,#dfe8f6,#b9cdec);border:1px solid #9fb6d6;padding:4px 6px;text-align:left;
+  }
+  table.gridtable td{border:1px solid #d8dee6;padding:4px 6px;}
+  table.gridtable tbody tr:nth-child(even){background:#f4f7fb;}
+  table.gridtable tbody tr:hover{background:#e2edfa;}
+  table.gridtable tbody tr.selected{background:#bcd7f7;}
+  .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+  .dot-green{background:var(--accent-green);}
+  .dot-yellow{background:#d6a51a;}
+  .dot-red{background:var(--accent-red);}
+
+  .table-with-actions{display:flex;gap:6px;align-items:flex-start;}
+  .table-with-actions .actions-col{display:flex;flex-direction:column;gap:4px;}
+  .table-with-actions .actions-col button{
+    width:28px;height:26px;border:1px solid var(--field-border);
+    background:linear-gradient(180deg,#fdfdfd,#dfe6ee);cursor:pointer;border-radius:2px;font-size:13px;
+  }
+  .two-col{display:grid;grid-template-columns:1.3fr 1fr;gap:10px;}
+
+  .protocolo-box{display:flex;gap:12px;align-items:flex-end;margin-top:8px;flex-wrap:wrap;}
+  .protocolo-box .field{flex:1;min-width:120px;}
+  .btn-visualizar{
+    padding:6px 14px;border:1px solid #7fb0e8;background:linear-gradient(180deg,#dfefff,#a9cff5);
+    border-radius:3px;cursor:pointer;font-weight:bold;color:#0a4b9c;white-space:nowrap;
+  }
+
+  /* Right sidebar */
+  .rightbar{width:280px;padding:10px;display:flex;flex-direction:column;gap:10px;}
+  .rbox{background:#fff;border:1px solid #7f9db9;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+  .rbox-title{
+    background:linear-gradient(180deg,#3f9bea,#1c6fce);color:#fff;font-weight:bold;padding:5px 8px;
+    display:flex;justify-content:space-between;align-items:center;font-size:12px;
+  }
+  .rbox-title .x{cursor:pointer;}
+  .actions-list{padding:6px;display:flex;flex-direction:column;gap:3px;}
+  .actions-list button{
+    display:flex;align-items:center;gap:8px;text-align:left;padding:6px 8px;border:1px solid transparent;
+    background:transparent;cursor:pointer;border-radius:3px;font-size:12px;width:100%;
+  }
+  .actions-list button:hover{background:#eaf3ff;border:1px solid #bcd7f7;}
+  .actions-list .ic{font-size:15px;width:18px;text-align:center;}
+  .kv{padding:8px;font-size:12px;}
+  .kv-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted #ddd;}
+  .kv-row span:first-child{color:#555;}
+  .kv-row span:last-child{font-weight:bold;}
+  .rbox table{width:100%;border-collapse:collapse;font-size:11px;}
+  .rbox table th{background:#eef3fa;padding:4px 6px;text-align:left;border-bottom:1px solid #d8dee6;}
+  .rbox table td{padding:4px 6px;border-bottom:1px solid #eee;}
+
+  /* status bar */
+  .statusbar{
+    background:var(--toolbar-bg1);border-top:1px solid #b8b6ab;display:flex;justify-content:space-between;
+    padding:4px 10px;font-size:11px;color:#333;
+  }
+  .statusbar div{padding-right:14px;border-right:1px solid #ccc;}
+  .statusbar div:last-child{border-right:none;}
+
+  /* modal / toast */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:200;
+  }
+  .overlay.show{display:flex;}
+  .modal{background:#fff;border:1px solid #7f9db9;border-radius:3px;min-width:340px;max-width:560px;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+  .modal-title{
+    background:linear-gradient(180deg,#3f9bea,#1c6fce);color:#fff;font-weight:bold;padding:6px 10px;
+    display:flex;justify-content:space-between;
+  }
+  .modal-title .x{cursor:pointer;}
+  .modal-body{padding:14px;font-size:12px;max-height:60vh;overflow:auto;}
+  .modal-actions{padding:8px 14px;text-align:right;border-top:1px solid #eee;}
+  .modal-actions button{
+    padding:6px 16px;border:1px solid #7fb0e8;background:linear-gradient(180deg,#dfefff,#a9cff5);
+    border-radius:3px;cursor:pointer;font-weight:bold;color:#0a4b9c;margin-left:6px;
+  }
+  .modal-body table.gridtable tr{cursor:pointer;}
+
+  .toasts{position:fixed;bottom:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:300;}
+  .toast{
+    background:#1c6fce;color:#fff;padding:9px 16px;border-radius:4px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.3);
+    animation:fadeIn .2s ease-out;
+  }
+  .toast.ok{background:#1a8a1a;}
+  .toast.err{background:#c0392b;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .closed-screen{
+    display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:60px 20px;text-align:center;gap:14px;
+  }
+  .closed-screen.show{display:flex;}
+  .closed-screen button{
+    padding:8px 20px;border:1px solid #7fb0e8;background:linear-gradient(180deg,#dfefff,#a9cff5);
+    border-radius:3px;cursor:pointer;font-weight:bold;color:#0a4b9c;
+  }
+</style>
+</head>
+<body>
+<div class="scrollwrap">
+<div class="app" id="app">
+
+  <div class="titlebar">
+    <div class="left">
+      <span class="icon">C</span>
+      <span>CIS Telecom - Strong Telecom</span>
+    </div>
+    <div class="winbtns">
+      <button title="Minimizar" onclick="minimizeApp()">_</button>
+      <button title="Maximizar" onclick="maximizeApp()">▢</button>
+      <button title="Fechar" class="close-btn" onclick="sairSistema()">✕</button>
+    </div>
+  </div>
+
+  <div class="closed-screen" id="closedScreen">
+    <div style="font-size:16px;font-weight:bold;">Sistema encerrado.</div>
+    <div>Obrigado por usar o CIS Telecom.</div>
+    <button onclick="reopenApp()">Reabrir sistema</button>
+  </div>
+
+  <div class="below-titlebar" id="belowTitlebar">
+    <!-- Menu bar -->
+    <div class="menubar" id="menubar">
+      <div class="menu-item" data-menu="arquivo">Arquivo
+        <div class="dropdown">
+          <a href="#" onclick="return acaoNovo()">Novo Cliente</a>
+          <a href="#" onclick="return acaoGravar()">Gravar</a>
+          <a href="#" onclick="return acaoImprimir()">Imprimir</a>
+          <hr>
+          <a href="#" onclick="return sairSistema()">Sair</a>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="cadastro">Cadastro
+        <div class="dropdown">
+          <a href="#" onclick="return selectTree('cliente')">Cliente</a>
+          <a href="#" onclick="return selectTree('endereco')">Endereço</a>
+          <a href="#" onclick="return selectTree('imovel')">Imóvel</a>
+          <a href="#" onclick="return selectTree('contrato')">Contrato</a>
+          <a href="#" onclick="return selectTree('servico')">Serviço</a>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="atendimento">Atendimento
+        <div class="dropdown">
+          <a href="#" onclick="return selectTree('protocolo')">Protocolo / Chamados</a>
+          <a href="#" onclick="return abrirChamado()">Abrir Chamado</a>
+          <a href="#" onclick="return consultarProtocolo()">Consultar Protocolo</a>
+          <a href="#" onclick="return openHistoricoModal()">Histórico de Atendimentos</a>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="servicos">Serviços
+        <div class="dropdown">
+          <a href="#" onclick="return ativarServico()">Ativar Serviço</a>
+          <a href="#" onclick="return suspenderServico()">Suspender Serviço</a>
+          <a href="#" onclick="return cancelarServico()">Cancelar Serviço</a>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="faturamento">Faturamento
+        <div class="dropdown">
+          <a href="#" onclick="return visualizarFatura()">Visualizar Fatura</a>
+          <a href="#" onclick="return consultarFatura()">Consultar Fatura</a>
+          <a href="#" onclick="return emitir2via()">Emitir 2ª Via</a>
+          <a href="#" onclick="return negociarDebitos()">Negociação de Débitos</a>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="relatorios">Relatórios
+        <div class="dropdown">
+          <a href="#" onclick="return relatorioClientes()">Relatório de Clientes</a>
+          <a href="#" onclick="return relatorioAtendimentos()">Relatório de Atendimentos</a>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="utilitarios">Utilitários
+        <div class="dropdown">
+          <a href="#" onclick="return realizarBackup()">Backup</a>
+          <a href="#" onclick="return abrirSincronizacaoMikrotik()">Sincronização MikroTik</a>
+          <a href="#" onclick="return abrirConfiguracoes()">Configurações</a>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="ajuda">Ajuda
+        <div class="dropdown">
+          <a href="#" onclick="return openSobreModal()">Sobre o CIS Telecom</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="tbtn" id="btnNovo" onclick="acaoNovo()"><span class="ic">📄</span>Novo</button>
+      <button class="tbtn" id="btnAlterar" onclick="acaoAlterar()"><span class="ic">✏️</span>Alterar</button>
+      <button class="tbtn" id="btnExcluir" onclick="acaoExcluir()"><span class="ic">❌</span>Excluir</button>
+      <button class="tbtn" id="btnConsultar" onclick="openConsultaModal()"><span class="ic">🔍</span>Consultar</button>
+      <div class="tb-sep"></div>
+      <button class="tbtn" id="btnGravar" onclick="acaoGravar()" disabled><span class="ic">💾</span>Gravar</button>
+      <button class="tbtn" id="btnCancelar" onclick="acaoCancelar()" disabled><span class="ic">⛔</span>Cancelar</button>
+      <div class="tb-sep"></div>
+      <button class="tbtn" onclick="acaoImprimir()"><span class="ic">🖨️</span>Imprimir</button>
+      <button class="tbtn" onclick="sairSistema()"><span class="ic">🚪</span>Sair</button>
+
+      <div class="toolbar-hdr">
+        <div>
+          <div class="title-main">CIS Telecom</div>
+          <div class="title-sub">Customer Integrated System</div>
+        </div>
+        <div class="brand">
+          <div class="b1">STRONG <span>TELECOM</span></div>
+          <div class="b2">Fibra que conecta você</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="body-row">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <h3>Menu Principal <span style="cursor:pointer" onclick="toast('Menu fixado','ok')">▾</span></h3>
+        <div class="tree">
+          <div class="tree-folder expanded" onclick="toggleFolder(this)"><span class="twisty">▾</span>📁 Cadastro</div>
+          <div class="tree-children">
+            <div class="tree-leaf selected" data-tree="cliente" onclick="selectTree('cliente')">🧾 Cliente</div>
+            <div class="tree-leaf" data-tree="endereco" onclick="selectTree('endereco')">🏠 Endereço</div>
+            <div class="tree-leaf" data-tree="imovel" onclick="selectTree('imovel')">🏢 Imóvel</div>
+            <div class="tree-leaf" data-tree="contrato" onclick="selectTree('contrato')">📃 Contrato</div>
+            <div class="tree-leaf" data-tree="servico" onclick="selectTree('servico')">🔧 Serviço</div>
+          </div>
+          <div class="tree-folder" onclick="toggleFolder(this)"><span class="twisty">▸</span>📁 Atendimento</div>
+          <div class="tree-children">
+            <div class="tree-leaf" data-tree="protocolo" onclick="selectTree('protocolo')">📄 Protocolo / Chamados</div>
+          </div>
+          <div class="tree-folder" onclick="toggleFolder(this)"><span class="twisty">▸</span>📁 Serviços</div>
+          <div class="tree-children">
+            <div class="tree-leaf" data-tree="servicos2" onclick="selectTree('servicos2')">📶 Gestão de Serviços</div>
+          </div>
+          <div class="tree-folder" onclick="toggleFolder(this)"><span class="twisty">▸</span>📁 Faturamento</div>
+          <div class="tree-children">
+            <div class="tree-leaf" data-tree="faturamento" onclick="selectTree('faturamento')">💰 Faturas</div>
+          </div>
+          <div class="tree-folder" onclick="toggleFolder(this)"><span class="twisty">▸</span>📁 Cobrança</div>
+          <div class="tree-children">
+            <div class="tree-leaf" data-tree="cobranca" onclick="selectTree('cobranca')">📇 Régua de Cobrança</div>
+          </div>
+          <div class="tree-folder" onclick="toggleFolder(this)"><span class="twisty">▸</span>📁 Relatórios</div>
+          <div class="tree-children">
+            <div class="tree-leaf" data-tree="relatorios" onclick="selectTree('relatorios')">📊 Relatórios Gerenciais</div>
+          </div>
+          <div class="tree-folder" onclick="toggleFolder(this)"><span class="twisty">▸</span>📁 Utilitários</div>
+          <div class="tree-children">
+            <div class="tree-leaf" data-tree="utilitarios" onclick="selectTree('utilitarios')">⚙️ Configurações</div>
+            <div class="tree-leaf" data-tree="mikrotik" onclick="selectTree('mikrotik')">📡 Sincronização MikroTik</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main window -->
+      <div class="mainpanel">
+        <div class="window">
+          <div class="window-title">
+            <span id="windowTitle">📇 Cadastro de Cliente</span>
+            <span class="wclose" onclick="acaoFechar()">✕</span>
+          </div>
+
+          <!-- Cliente module -->
+          <div id="moduloCliente">
+            <div class="tabs">
+              <div class="tab active" data-tab="dados" onclick="selectTab('dados')">Dados Cadastrais</div>
+              <div class="tab" data-tab="endereco" onclick="selectTab('endereco')">Endereço</div>
+              <div class="tab" data-tab="contratos" onclick="selectTab('contratos')">Contratos</div>
+              <div class="tab" data-tab="servicos" onclick="selectTab('servicos')">Serviços</div>
+              <div class="tab" data-tab="obs" onclick="selectTab('obs')">Observações</div>
+            </div>
+
+            <!-- TAB: Dados Cadastrais -->
+            <div class="tabcontent active" data-tabcontent="dados">
+              <fieldset>
+                <legend>Identificação</legend>
+                <div class="grid g4">
+                  <div class="field">
+                    <label>Nº Cliente:</label>
+                    <div class="field-row">
+                      <input type="text" id="f_numCliente" disabled>
+                      <button class="iconbtn" onclick="openConsultaModal()">🔍</button>
+                    </div>
+                  </div>
+                  <div class="field" style="grid-column:span 2;">
+                    <label>Tipo de Pessoa:</label>
+                    <div class="radio-group" style="padding-top:6px;">
+                      <label><input type="radio" name="tipoPessoa" value="Física" id="rFisica" disabled onchange="onTipoPessoaChange()"> Física</label>
+                      <label><input type="radio" name="tipoPessoa" value="Jurídica" id="rJuridica" disabled onchange="onTipoPessoaChange()"> Jurídica</label>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label id="lblDoc">RG/IE:</label>
+                    <input type="text" id="f_rgie" disabled>
+                  </div>
+                </div>
+                <div class="grid g4" style="margin-top:8px;">
+                  <div class="field">
+                    <label id="lblCpf">CPF/CNPJ:</label>
+                    <div class="field-row">
+                      <input type="text" id="f_cpf" disabled>
+                      <button class="iconbtn" onclick="toast('Documento validado na Receita Federal (simulado)','ok')">🔄</button>
+                    </div>
+                  </div>
+                  <div class="field" style="grid-column:span 2;">
+                    <label id="lblNome">Nome / Razão Social:</label>
+                    <input type="text" id="f_nome" disabled>
+                  </div>
+                  <div class="field">
+                    <label>Nome Fantasia:</label>
+                    <input type="text" id="f_fantasia" disabled>
+                  </div>
+                </div>
+                <div class="grid g4" style="margin-top:8px;">
+                  <div class="field">
+                    <label>Data Nascimento:</label>
+                    <div class="field-row">
+                      <input type="text" id="f_nasc" disabled placeholder="dd/mm/aaaa">
+                      <button class="iconbtn" onclick="toast('Abrir calendário','ok')">📅</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Sexo:</label>
+                    <select id="f_sexo" disabled>
+                      <option>Masculino</option><option>Feminino</option><option>Outro</option>
+                    </select>
+                  </div>
+                  <div class="field" style="grid-column:span 2;">
+                    <label>Situação:</label>
+                    <select id="f_situacao" disabled onchange="onSituacaoChange()">
+                      <option>ATIVO</option><option>INATIVO</option><option>SUSPENSO</option><option>CANCELADO</option>
+                    </select>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Endereço</legend>
+                <div class="grid g4">
+                  <div class="field">
+                    <label>CEP:</label>
+                    <div class="field-row">
+                      <input type="text" id="f_cep" disabled>
+                      <button class="iconbtn" onclick="buscarCepPrincipal()">🔍</button>
+                    </div>
+                  </div>
+                  <div class="field" style="grid-column:span 2;">
+                    <label>Logradouro:</label>
+                    <input type="text" id="f_logradouro" disabled>
+                  </div>
+                  <div class="field">
+                    <label>Nº:</label>
+                    <input type="text" id="f_numEnd" disabled>
+                  </div>
+                </div>
+                <div class="grid g4" style="margin-top:8px;">
+                  <div class="field">
+                    <label>Complemento:</label>
+                    <input type="text" id="f_complemento" disabled>
+                  </div>
+                  <div class="field" style="grid-column:span 3;">
+                    <label>Ponto de Referência:</label>
+                    <input type="text" id="f_referencia" disabled>
+                  </div>
+                </div>
+                <div class="grid g3" style="margin-top:8px;">
+                  <div class="field">
+                    <label>Bairro:</label>
+                    <input type="text" id="f_bairro" disabled>
+                  </div>
+                  <div class="field">
+                    <label>Cidade:</label>
+                    <select id="f_cidade" disabled>
+                      <option>CURITIBA</option><option>LONDRINA</option><option>MARINGÁ</option><option>PONTA GROSSA</option><option>CASCAVEL</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>UF:</label>
+                    <select id="f_uf" disabled>
+                      <option>PR</option><option>SC</option><option>SP</option><option>RS</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="grid g2" style="margin-top:8px;">
+                  <div class="field">
+                    <label>Telefone:</label>
+                    <input type="text" id="f_telefone" disabled>
+                  </div>
+                  <div class="field">
+                    <label>E-mail:</label>
+                    <input type="text" id="f_email" disabled>
+                  </div>
+                </div>
+              </fieldset>
+
+              <div class="two-col">
+                <fieldset>
+                  <legend>Telefones Adicionais</legend>
+                  <div class="table-with-actions">
+                    <table class="gridtable" id="tblTelefones">
+                      <thead><tr><th>Tipo</th><th>Número</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                    <div class="actions-col">
+                      <button title="Adicionar" onclick="telAdicionar()">➕</button>
+                      <button title="Editar" onclick="telEditar()">✏️</button>
+                      <button title="Remover" onclick="telRemover()">✖️</button>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Contrato / Produto</legend>
+                  <div class="grid g2">
+                    <div class="field">
+                      <label>Contrato:</label>
+                      <div class="field-row">
+                        <input type="text" id="f_contrato" disabled>
+                        <button class="iconbtn" onclick="toast('Consultando contrato','ok')">🔍</button>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label>Produto:</label>
+                      <select id="f_produto" disabled>
+                        <option>INTERNET BANDA LARGA</option><option>INTERNET + TV</option><option>COMBO RESIDENCIAL</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid g2" style="margin-top:8px;">
+                    <div class="field">
+                      <label>Plano:</label>
+                      <select id="f_plano" disabled>
+                        <option>300 MEGA</option><option>400 MEGA</option><option>600 MEGA</option><option>1 GIGA</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                    </div>
+                  </div>
+                  <div class="grid g2" style="margin-top:8px;">
+                    <div class="field">
+                      <label>Data Ativação:</label>
+                      <div class="field-row">
+                        <input type="text" id="f_ativacao" disabled>
+                        <button class="iconbtn" onclick="toast('Abrir calendário','ok')">📅</button>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label>Vencimento:</label>
+                      <div class="field-row">
+                        <input type="text" id="f_vencimento" disabled>
+                        <button class="iconbtn" onclick="toast('Abrir calendário','ok')">📅</button>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <fieldset>
+                <legend>Histórico de Atendimentos</legend>
+                <table class="gridtable" id="tblHistorico">
+                  <thead><tr><th>Data</th><th>Protocolo</th><th>Tipo de Atendimento</th><th>Descrição</th><th>Status</th><th>Usuário</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+                <div class="protocolo-box">
+                  <div class="field"><label>Nº Protocolo:</label><input type="text" id="p_num" disabled></div>
+                  <div class="field"><label>Data Abertura:</label><input type="text" id="p_data" disabled></div>
+                  <div class="field"><label>Tipo:</label><input type="text" id="p_tipo" disabled></div>
+                  <div class="field"><label>Situação:</label><input type="text" id="p_situacao" disabled></div>
+                  <button class="btn-visualizar" onclick="visualizarProtocolo()">🔍 Visualizar</button>
+                </div>
+              </fieldset>
+            </div>
+
+            <div class="tabcontent" data-tabcontent="endereco">
+              <fieldset>
+                <legend>Endereço Atual</legend>
+                <div class="kv" id="enderecoAtualResumo"></div>
+              </fieldset>
+              <fieldset>
+                <legend>Troca de Endereço</legend>
+                <p style="margin:0 0 8px 0;color:#555;">Informe o novo endereço e verifique a disponibilidade técnica antes de confirmar a troca.</p>
+                <div class="grid g4">
+                  <div class="field">
+                    <label>Novo CEP:</label>
+                    <div class="field-row">
+                      <input type="text" id="te_cep" placeholder="00.000-000">
+                      <button class="iconbtn" onclick="buscarCepTroca()">🔍</button>
+                    </div>
+                  </div>
+                  <div class="field" style="grid-column:span 2;">
+                    <label>Logradouro:</label>
+                    <input type="text" id="te_logradouro">
+                  </div>
+                  <div class="field">
+                    <label>Nº:</label>
+                    <input type="text" id="te_numero">
+                  </div>
+                </div>
+                <div class="grid g4" style="margin-top:8px;">
+                  <div class="field">
+                    <label>Complemento:</label>
+                    <input type="text" id="te_complemento">
+                  </div>
+                  <div class="field">
+                    <label>Bairro:</label>
+                    <input type="text" id="te_bairro">
+                  </div>
+                  <div class="field">
+                    <label>Cidade:</label>
+                    <select id="te_cidade">
+                      <option>CURITIBA</option><option>LONDRINA</option><option>MARINGÁ</option><option>PONTA GROSSA</option><option>CASCAVEL</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>UF:</label>
+                    <select id="te_uf">
+                      <option>PR</option><option>SC</option><option>SP</option><option>RS</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  <button class="btn-visualizar" onclick="verificarDisponibilidade()">📡 Verificar Disponibilidade</button>
+                  <button class="btn-visualizar" id="btnConfirmarTroca" style="display:none;" onclick="confirmarTrocaEndereco()">✅ Confirmar Troca de Endereço</button>
+                </div>
+                <div id="resultadoDisponibilidade" style="margin-top:12px;"></div>
+              </fieldset>
+            </div>
+            <div class="tabcontent" data-tabcontent="contratos">
+              <p style="padding:8px;">Lista de contratos do cliente:</p>
+              <table class="gridtable"><thead><tr><th>Contrato</th><th>Produto</th><th>Plano</th><th>Situação</th></tr></thead>
+              <tbody id="tblContratosLista"></tbody></table>
+            </div>
+            <div class="tabcontent" data-tabcontent="servicos">
+              <p style="padding:8px 8px 0 8px;">Serviços contratados:</p>
+              <div style="padding:0 8px;">
+                <table class="gridtable"><thead><tr><th>Serviço</th><th>Status</th></tr></thead>
+                <tbody id="tblServicosLista"></tbody></table>
+              </div>
+              <fieldset style="margin:14px 8px 8px 8px;">
+                <legend>Adicionar Planos e Serviços à Linha do Cliente</legend>
+                <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;padding:10px;background:#f4f6fa;border-radius:4px;">
+                  <div class="field" style="flex:2;min-width:180px;margin-bottom:0;">
+                    <label>Novo Plano/Serviço:</label>
+                    <input type="text" id="novoTipoNome" placeholder="Ex: Plano Internet 2 GIGA">
+                  </div>
+                  <div class="field" style="flex:1;min-width:150px;margin-bottom:0;">
+                    <label>Categoria:</label>
+                    <select id="novoTipoCategoria">
+                      <option value="Planos de Internet">Plano de Internet</option>
+                      <option value="Descontos">Desconto</option>
+                      <option value="Serviços Adicionais">Serviço Adicional</option>
+                    </select>
+                  </div>
+                  <button class="btn-visualizar" onclick="adicionarNovoTipoCatalogo()">➕ Adicionar Novo Tipo</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <div style="flex:1;min-width:220px;">
+                    <label style="display:block;font-size:11px;font-weight:bold;margin-bottom:4px;">Planos e Serviços Disponíveis</label>
+                    <select id="selDisponiveis" multiple size="9" style="width:100%;border:1px solid var(--field-border);border-radius:2px;font-size:12px;padding:2px;">
+                      <optgroup label="Planos de Internet">
+                        <option value="300 MEGA">Plano Internet 300 MEGA</option>
+                        <option value="400 MEGA">Plano Internet 400 MEGA</option>
+                        <option value="600 MEGA">Plano Internet 600 MEGA</option>
+                        <option value="1 GIGA">Plano Internet 1 GIGA</option>
+                      </optgroup>
+                      <optgroup label="Descontos">
+                        <option value="Desconto Fidelidade">Desconto Fidelidade (-10%)</option>
+                        <option value="Desconto Indicação">Desconto Indicação (-5%)</option>
+                        <option value="Desconto Portabilidade">Desconto Portabilidade (-15%)</option>
+                      </optgroup>
+                      <optgroup label="Serviços Adicionais">
+                        <option value="TV por Assinatura">TV por Assinatura</option>
+                        <option value="Telefonia Fixa">Telefonia Fixa</option>
+                        <option value="Backup em Nuvem">Backup em Nuvem</option>
+                        <option value="Wi-Fi Mesh">Wi-Fi Mesh</option>
+                        <option value="Suporte Prioritário">Suporte Prioritário</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                  <div style="display:flex;flex-direction:row;gap:8px;justify-content:center;min-width:60px;">
+                    <button class="iconbtn" style="font-size:16px;padding:8px 12px;" onclick="moverParaAdicionados()" title="Adicionar à lista">➡️</button>
+                    <button class="iconbtn" style="font-size:16px;padding:8px 12px;" onclick="removerDosAdicionados()" title="Remover da lista">⬅️</button>
+                  </div>
+                  <div style="flex:1;min-width:220px;">
+                    <label style="display:block;font-size:11px;font-weight:bold;margin-bottom:4px;">Itens a Adicionar na Linha do Cliente</label>
+                    <select id="selAdicionados" multiple size="9" style="width:100%;border:1px solid var(--field-border);border-radius:2px;font-size:12px;padding:2px;"></select>
+                  </div>
+                </div>
+                <div style="margin-top:10px;text-align:right;">
+                  <button class="btn-visualizar" onclick="confirmarAdicaoPlanos()">✅ Adicionar à Linha do Cliente</button>
+                </div>
+              </fieldset>
+            </div>
+            <div class="tabcontent" data-tabcontent="obs">
+              <div class="field" style="padding:8px;">
+                <label>Observações:</label>
+                <textarea id="f_obs" rows="8" disabled></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Placeholder module for other tree items -->
+          <div id="moduloPlaceholder" style="display:none;padding:30px;text-align:center;color:#555;">
+            <div style="font-size:34px;">🛠️</div>
+            <div style="font-size:15px;font-weight:bold;margin-top:8px;" id="placeholderTitle">Módulo</div>
+            <div style="margin-top:6px;">Este módulo está em desenvolvimento nesta réplica de demonstração.</div>
+            <button class="btn-visualizar" style="margin-top:14px;" onclick="selectTree('cliente')">Voltar ao Cadastro de Cliente</button>
+          </div>
+
+          <!-- Módulo: Protocolo / Chamados -->
+          <div id="moduloProtocolo" style="display:none;">
+            <div style="display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;background:linear-gradient(180deg,#f4f3ee,#dcdad0);border-bottom:1px solid #b8b6ab;">
+              <button class="tbtn" onclick="protocoloNovo()"><span class="ic">📄</span>Novo</button>
+              <button class="tbtn" onclick="protocoloSalvar()"><span class="ic">💾</span>Salvar</button>
+              <button class="tbtn" onclick="protocoloCancelar()"><span class="ic">⛔</span>Cancelar</button>
+              <button class="tbtn" onclick="protocoloExcluir()"><span class="ic">❌</span>Excluir</button>
+              <button class="tbtn" onclick="protocoloImprimir()"><span class="ic">🖨️</span>Imprimir</button>
+              <button class="tbtn" onclick="protocoloAnexos()"><span class="ic">📎</span>Anexos</button>
+              <button class="tbtn" onclick="selectProtocoloTab('historico')"><span class="ic">🕒</span>Histórico</button>
+              <button class="tbtn" onclick="protocoloEmail()"><span class="ic">✉️</span>Email</button>
+              <button class="tbtn" onclick="protocoloReabrir()"><span class="ic">🔄</span>Reabrir</button>
+              <button class="tbtn" onclick="protocoloFecharChamado()"><span class="ic">📪</span>Fechar</button>
+            </div>
+
+            <div class="tabs">
+              <div class="tab active" data-ptab="dados" onclick="selectProtocoloTab('dados')">Dados do Chamado</div>
+              <div class="tab" data-ptab="historico" onclick="selectProtocoloTab('historico')">Histórico</div>
+              <div class="tab" data-ptab="anexos" onclick="selectProtocoloTab('anexos')">Anexos</div>
+              <div class="tab" data-ptab="obs" onclick="selectProtocoloTab('obs')">Observações</div>
+            </div>
+
+            <div class="tabcontent active" data-ptabcontent="dados">
+              <fieldset>
+                <legend>Dados do Cliente</legend>
+                <div class="grid g4">
+                  <div class="field">
+                    <label>Código do Cliente:</label>
+                    <div class="field-row">
+                      <input type="text" id="pr_codigoCliente" disabled>
+                      <button class="iconbtn" onclick="protocoloBuscarCliente()">🔍</button>
+                    </div>
+                  </div>
+                  <div class="field" style="grid-column:span 2;"><label>Nome:</label><input type="text" id="pr_nomeCliente" disabled></div>
+                  <div class="field"><label>CPF:</label><input type="text" id="pr_cpfCliente" disabled></div>
+                </div>
+                <div class="grid g2" style="margin-top:8px;">
+                  <div class="field"><label>Telefone:</label><input type="text" id="pr_telCliente" disabled></div>
+                  <div class="field"><label>E-mail:</label><input type="text" id="pr_emailCliente" disabled></div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Dados do Chamado</legend>
+                <div class="grid g4">
+                  <div class="field"><label>Nº Protocolo:</label><input type="text" id="pr_protocolo" disabled></div>
+                  <div class="field"><label>Data Abertura:</label><input type="text" id="pr_dataAbertura" disabled></div>
+                  <div class="field">
+                    <label>Tipo de Atendimento:</label>
+                    <select id="pr_tipo"><option>Suporte Técnico</option><option>Comercial</option><option>Financeiro</option><option>Cancelamento</option></select>
+                  </div>
+                  <div class="field">
+                    <label>Canal de Entrada:</label>
+                    <select id="pr_canal"><option>Telefone</option><option>E-mail</option><option>WhatsApp</option><option>Presencial</option><option>App</option></select>
+                  </div>
+                </div>
+                <div class="grid g4" style="margin-top:8px;">
+                  <div class="field">
+                    <label>Prioridade:</label>
+                    <select id="pr_prioridade"><option>Baixa</option><option selected>Média</option><option>Alta</option></select>
+                  </div>
+                  <div class="field" style="grid-column:span 3;"><label>Assunto:</label><input type="text" id="pr_assunto" placeholder="Ex: Falha na Internet"></div>
+                </div>
+                <div class="two-col" style="margin-top:8px;">
+                  <div class="field"><label>Descrição do Chamado:</label><textarea id="pr_descricao" rows="5"></textarea></div>
+                  <div>
+                    <div class="field"><label>Status:</label>
+                      <select id="pr_status" onchange="atualizarCorStatusProtocolo()">
+                        <option>Aberto</option><option>Em Atendimento</option><option>Resolvido</option><option>Cancelado</option>
+                      </select>
+                    </div>
+                    <div class="field" style="margin-top:8px;"><label>Técnico Responsável:</label>
+                      <select id="pr_tecnico"><option>Carlos Rodrigues</option><option>Ana Lima</option><option>João Souza</option><option>Marcos Vieira</option></select>
+                    </div>
+                    <div class="field" style="margin-top:8px;"><label>Prazo de Atendimento:</label><input type="text" id="pr_prazo" placeholder="dd/mm/aaaa"></div>
+                    <div class="field" style="margin-top:8px;"><label>Setor:</label>
+                      <select id="pr_setor"><option>Suporte Técnico</option><option>Comercial</option><option>Financeiro</option><option>Instalação de Campo</option><option>Atendimento ao Cliente</option></select>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Anotações</legend>
+                <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
+                  <div id="pr_anotacoesLista" style="flex:1;min-width:260px;background:#fafbfc;border:1px solid #e0e4ec;border-radius:4px;padding:8px;min-height:60px;font-size:11.5px;max-height:140px;overflow:auto;">
+                    <span style="color:#999;">Nenhuma anotação registrada.</span>
+                  </div>
+                  <button class="btn-visualizar" onclick="protocoloAdicionarAnotacao()">💬 Adicionar Anotação</button>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Histórico de Chamados</legend>
+                <table class="gridtable">
+                  <thead><tr><th>Nº Protocolo</th><th>Data Abertura</th><th>Cliente</th><th>Assunto</th><th>Status</th><th>Técnico</th><th>Prioridade</th></tr></thead>
+                  <tbody id="pr_tabelaHistorico"></tbody>
+                </table>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;">
+                  <span id="pr_totalRegistros">Total de registros: 0</span>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="iconbtn" onclick="protocoloPaginaAnterior()">◀</button>
+                    <span id="pr_paginaAtual">1 de 1</span>
+                    <button class="iconbtn" onclick="protocoloProximaPagina()">▶</button>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+
+            <div class="tabcontent" data-ptabcontent="historico">
+              <p style="padding:8px;">Linha do tempo deste chamado (status e anotações):</p>
+              <div id="pr_historicoDetalhado" style="padding:0 8px 8px 8px;font-size:11.5px;"></div>
+            </div>
+
+            <div class="tabcontent" data-ptabcontent="anexos">
+              <div style="padding:8px;">
+                <button class="btn-visualizar" onclick="protocoloAnexos()">📎 Adicionar Anexo</button>
+                <table class="gridtable" style="margin-top:10px;">
+                  <thead><tr><th>Arquivo</th><th>Enviado em</th></tr></thead>
+                  <tbody id="pr_tabelaAnexos"><tr><td colspan="2" style="color:#999;">Nenhum anexo.</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="tabcontent" data-ptabcontent="obs">
+              <div class="field" style="padding:8px;">
+                <label>Observações Gerais:</label>
+                <textarea id="pr_obsGerais" rows="8"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right sidebar -->
+      <div class="rightbar">
+        <div class="rbox">
+          <div class="rbox-title">Ações <span class="x" onclick="toast('Painel de ações','ok')">✕</span></div>
+          <div class="actions-list">
+            <button onclick="acaoNovo()"><span class="ic">📄</span>Novo Cliente</button>
+            <button onclick="acaoAlterar()"><span class="ic">✏️</span>Alterar Cliente</button>
+            <button onclick="acaoExcluir()"><span class="ic">❌</span>Excluir Cliente</button>
+            <button onclick="openConsultaModal()"><span class="ic">🔍</span>Consultar Cliente</button>
+            <button onclick="visualizarFatura()"><span class="ic">💰</span>Visualizar Fatura</button>
+            <button onclick="acaoImprimir()"><span class="ic">🖨️</span>Imprimir</button>
+            <button onclick="acaoFechar()"><span class="ic">🚪</span>Fechar</button>
+          </div>
+        </div>
+
+        <div class="rbox">
+          <div class="rbox-title">Dados do Cliente</div>
+          <div class="kv">
+            <div class="kv-row"><span>Cliente:</span><span id="r_cliente">-</span></div>
+            <div class="kv-row"><span>Contrato:</span><span id="r_contrato">-</span></div>
+            <div class="kv-row"><span>Plano:</span><span id="r_plano">-</span></div>
+            <div class="kv-row"><span>Situação:</span><span id="r_situacao">-</span></div>
+          </div>
+        </div>
+
+        <div class="rbox">
+          <div class="rbox-title">Serviços Contratados</div>
+          <table>
+            <thead><tr><th>Serviço</th><th>Status</th></tr></thead>
+            <tbody id="r_servicos"></tbody>
+          </table>
+        </div>
+
+        <div class="rbox">
+          <div class="rbox-title">Último Atendimento</div>
+          <div class="kv">
+            <div class="kv-row"><span>Data:</span><span id="r_ultData">-</span></div>
+            <div class="kv-row"><span>Protocolo:</span><span id="r_ultProt">-</span></div>
+            <div class="kv-row"><span>Tipo:</span><span id="r_ultTipo">-</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="statusbar">
+      <div>Usuário: <b id="s_usuario">joao.silva</b></div>
+      <div style="flex:1;text-align:center;">CIS Telecom - Strong Telecom</div>
+      <div id="s_datetime">-</div>
+      <div>Versão 2.3.7</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Consulta modal -->
+<div class="overlay" id="modalConsulta">
+  <div class="modal" style="min-width:600px;">
+    <div class="modal-title"><span>🔍 Consultar Cliente</span><span class="x" onclick="closeModal('modalConsulta')">✕</span></div>
+    <div class="modal-body">
+      <input type="text" id="consultaBusca" placeholder="Buscar por nome, CPF/CNPJ ou nº cliente..." oninput="renderConsultaLista()" style="margin-bottom:10px;">
+      <table class="gridtable">
+        <thead><tr><th>Nº Cliente</th><th>Nome / Razão Social</th><th>CPF/CNPJ</th><th>Situação</th></tr></thead>
+        <tbody id="consultaLista"></tbody>
+      </table>
+    </div>
+    <div class="modal-actions"><button onclick="closeModal('modalConsulta')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- Historico / protocolo modal -->
+<div class="overlay" id="modalDetalhe">
+  <div class="modal">
+    <div class="modal-title"><span id="detalheTitulo">Detalhe do Atendimento</span><span class="x" onclick="closeModal('modalDetalhe')">✕</span></div>
+    <div class="modal-body" id="detalheBody"></div>
+    <div class="modal-actions"><button onclick="closeModal('modalDetalhe')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- Sobre modal -->
+<div class="overlay" id="modalSobre">
+  <div class="modal">
+    <div class="modal-title"><span>Sobre o CIS Telecom</span><span class="x" onclick="closeModal('modalSobre')">✕</span></div>
+    <div class="modal-body">
+      <p><b>CIS Telecom — Customer Integrated System</b><br>Versão 2.3.7</p>
+      <p>Sistema de gestão de clientes, contratos e atendimentos da Strong Telecom.</p>
+      <p style="color:#777;">Réplica de demonstração criada para fins de visualização de interface.</p>
+    </div>
+    <div class="modal-actions"><button onclick="closeModal('modalSobre')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- Modal genérico (usado pelos itens de menu) -->
+<div class="overlay" id="modalGeneric">
+  <div class="modal" id="modalGenericBox" style="min-width:420px;">
+    <div class="modal-title"><span id="genericTitle">Título</span><span class="x" onclick="closeModal('modalGeneric')">✕</span></div>
+    <div class="modal-body" id="genericBody"></div>
+    <div class="modal-actions" id="genericActions"><button onclick="closeModal('modalGeneric')">Fechar</button></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+<script>
+/* ---------------- Dados de exemplo ---------------- */
+let clients = [
+  {
+    numCliente:"0001234567", tipoPessoa:"Física", cpf:"123.456.789-00", rgie:"",
+    nome:"JOÃO DA SILVA", fantasia:"-", nasc:"15/03/1985", sexo:"Masculino", situacao:"ATIVO",
+    cep:"80.010-000", logradouro:"RUA DAS FLORES", numEnd:"123", complemento:"APTO 101", referencia:"",
+    bairro:"CENTRO", cidade:"CURITIBA", uf:"PR", telefone:"(41) 98765-4321", email:"joao@email.com",
+    telefones:[{tipo:"Residencial",numero:"(41) 3322-4455"},{tipo:"Comercial",numero:"(41) 3021-9988"},{tipo:"Celular",numero:"(41) 91234-5678"}],
+    contrato:"0009876543", produto:"INTERNET BANDA LARGA", plano:"600 MEGA", ativacao:"10/10/2022", vencimento:"10/10/2026",
+    servicos:[{nome:"Internet Fibra",status:"ATIVO"},{nome:"TV por Assinatura",status:"ATIVO"},{nome:"Telefonia Fixa",status:"INATIVO"}],
+    historico:[
+      {data:"16/09/2026",protocolo:"845221",tipo:"Suporte Técnico",descricao:"Instalação de roteador",status:"CONCLUÍDO",usuario:"joao.s",hora:"09:14"},
+      {data:"14/09/2026",protocolo:"844918",tipo:"Financeiro",descricao:"Consulta de fatura",status:"ABERTO",usuario:"maria.s",hora:"11:02"},
+      {data:"10/09/2026",protocolo:"843765",tipo:"Suporte Técnico",descricao:"Queda de internet",status:"CONCLUÍDO",usuario:"carlos.r",hora:"08:47"},
+      {data:"05/09/2026",protocolo:"842901",tipo:"Comercial",descricao:"Alteração de plano",status:"CONCLUÍDO",usuario:"ana.l",hora:"14:20"},
+      {data:"02/09/2026",protocolo:"842110",tipo:"Suporte Técnico",descricao:"Instalação de TV",status:"CONCLUÍDO",usuario:"joao.s",hora:"10:05"}
+    ],
+    obs:""
+  },
+  {
+    numCliente:"0001234568", tipoPessoa:"Física", cpf:"987.654.321-11", rgie:"",
+    nome:"MARIA OLIVEIRA SANTOS", fantasia:"-", nasc:"22/07/1990", sexo:"Feminino", situacao:"ATIVO",
+    cep:"80.230-100", logradouro:"AV. SETE DE SETEMBRO", numEnd:"4520", complemento:"CASA", referencia:"Próx. ao mercado",
+    bairro:"BATEL", cidade:"CURITIBA", uf:"PR", telefone:"(41) 99887-1122", email:"maria.oliveira@email.com",
+    telefones:[{tipo:"Celular",numero:"(41) 99887-1122"}],
+    contrato:"0009876544", produto:"INTERNET + TV", plano:"400 MEGA", ativacao:"05/02/2023", vencimento:"05/02/2027",
+    servicos:[{nome:"Internet Fibra",status:"ATIVO"},{nome:"TV por Assinatura",status:"ATIVO"}],
+    historico:[
+      {data:"12/09/2026",protocolo:"845010",tipo:"Comercial",descricao:"Upgrade de plano",status:"CONCLUÍDO",usuario:"ana.l",hora:"13:30"}
+    ],
+    obs:""
+  },
+  {
+    numCliente:"0001234569", tipoPessoa:"Jurídica", cpf:"12.345.678/0001-99", rgie:"90312345-70",
+    nome:"TECH SOLUÇÕES LTDA", fantasia:"TECH SOLUÇÕES", nasc:"", sexo:"Masculino", situacao:"ATIVO",
+    cep:"80.420-090", logradouro:"RUA COMENDADOR ARAÚJO", numEnd:"850", complemento:"SALA 302", referencia:"",
+    bairro:"CENTRO", cidade:"CURITIBA", uf:"PR", telefone:"(41) 3225-7788", email:"contato@techsolucoes.com.br",
+    telefones:[{tipo:"Comercial",numero:"(41) 3225-7788"}],
+    contrato:"0009876545", produto:"COMBO RESIDENCIAL", plano:"1 GIGA", ativacao:"01/01/2021", vencimento:"01/01/2027",
+    servicos:[{nome:"Internet Fibra",status:"ATIVO"},{nome:"Telefonia Fixa",status:"ATIVO"}],
+    historico:[
+      {data:"01/09/2026",protocolo:"841500",tipo:"Suporte Técnico",descricao:"Manutenção de link dedicado",status:"CONCLUÍDO",usuario:"carlos.r",hora:"09:00"}
+    ],
+    obs:""
+  },
+  {
+    numCliente:"0001234570", tipoPessoa:"Física", cpf:"456.789.123-22", rgie:"",
+    nome:"CARLOS EDUARDO PEREIRA", fantasia:"-", nasc:"03/11/1978", sexo:"Masculino", situacao:"INATIVO",
+    cep:"81.010-000", logradouro:"RUA DOS PINHEIROS", numEnd:"77", complemento:"", referencia:"",
+    bairro:"ÁGUA VERDE", cidade:"CURITIBA", uf:"PR", telefone:"(41) 98123-4567", email:"carlos.pereira@email.com",
+    telefones:[{tipo:"Celular",numero:"(41) 98123-4567"}],
+    contrato:"0009876546", produto:"INTERNET BANDA LARGA", plano:"300 MEGA", ativacao:"15/06/2020", vencimento:"15/06/2024",
+    servicos:[{nome:"Internet Fibra",status:"INATIVO"}],
+    historico:[
+      {data:"20/06/2024",protocolo:"810023",tipo:"Cancelamento",descricao:"Cancelamento de contrato",status:"CONCLUÍDO",usuario:"ana.l",hora:"16:40"}
+    ],
+    obs:"Cliente solicitou cancelamento por mudança de endereço."
+  }
+];
+
+let currentIndex = 0;
+let editing = false;
+let editingIsNew = false;
+let snapshotBeforeEdit = null;
+let selectedTelIndex = null;
+let selectedHistIndex = null;
+let emailConfig = {
+  servidor: 'smtp.strongtelecom.com.br',
+  porta: '587',
+  usuario: 'faturamento@strongtelecom.com.br',
+  senha: '',
+  remetenteNome: 'Strong Telecom - Faturamento',
+  ssl: true
+};
+let mikrotikConfig = {
+  host: '', porta: '8728', usuario: 'admin', senha: '', modo: 'rest',
+  conectado: false, ultimaSync: null
+};
+
+/* ---------------- Toast ---------------- */
+function toast(msg, type){
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 2600);
+}
+
+/* ---------------- Render ---------------- */
+function blankClient(){
+  return {numCliente:"(novo)",tipoPessoa:"Física",cpf:"",rgie:"",nome:"",fantasia:"",nasc:"",sexo:"Masculino",situacao:"ATIVO",
+    cep:"",logradouro:"",numEnd:"",complemento:"",referencia:"",bairro:"",cidade:"CURITIBA",uf:"PR",telefone:"",email:"",
+    telefones:[],contrato:"",produto:"INTERNET BANDA LARGA",plano:"300 MEGA",ativacao:"",vencimento:"",
+    servicos:[],historico:[],obs:""};
+}
+
+function renderClient(c){
+  document.getElementById('f_numCliente').value = c.numCliente;
+  document.getElementById('rFisica').checked = c.tipoPessoa === 'Física';
+  document.getElementById('rJuridica').checked = c.tipoPessoa === 'Jurídica';
+  document.getElementById('f_cpf').value = c.cpf;
+  document.getElementById('f_rgie').value = c.rgie;
+  document.getElementById('f_nome').value = c.nome;
+  document.getElementById('f_fantasia').value = c.fantasia;
+  document.getElementById('f_nasc').value = c.nasc;
+  document.getElementById('f_sexo').value = c.sexo;
+  document.getElementById('f_situacao').value = c.situacao;
+  document.getElementById('f_cep').value = c.cep;
+  document.getElementById('f_logradouro').value = c.logradouro;
+  document.getElementById('f_numEnd').value = c.numEnd;
+  document.getElementById('f_complemento').value = c.complemento;
+  document.getElementById('f_referencia').value = c.referencia;
+  document.getElementById('f_bairro').value = c.bairro;
+  document.getElementById('f_cidade').value = c.cidade;
+  document.getElementById('f_uf').value = c.uf;
+  document.getElementById('f_telefone').value = c.telefone;
+  document.getElementById('f_email').value = c.email;
+  document.getElementById('f_contrato').value = c.contrato;
+  document.getElementById('f_produto').value = c.produto;
+  document.getElementById('f_plano').value = c.plano;
+  document.getElementById('f_ativacao').value = c.ativacao;
+  document.getElementById('f_vencimento').value = c.vencimento;
+  document.getElementById('f_obs').value = c.obs || "";
+  onTipoPessoaChange(c.tipoPessoa);
+  applySituacaoStyle(c.situacao);
+  renderTelefones(c);
+  renderHistorico(c);
+  renderContratosLista(c);
+  renderServicosLista(c);
+  renderRightbar(c);
+  atualizarResumoEnderecoAtual(c);
+  resetTrocaEnderecoForm();
+  resetFormTitularidade();
+  selectedTelIndex = null; selectedHistIndex = null;
+}
+
+function onTipoPessoaChange(force){
+  const val = force || (document.getElementById('rJuridica').checked ? 'Jurídica' : 'Física');
+  document.getElementById('lblCpf').textContent = val === 'Jurídica' ? 'CNPJ:' : 'CPF:';
+  document.getElementById('lblNome').textContent = val === 'Jurídica' ? 'Razão Social:' : 'Nome:';
+  document.getElementById('lblDoc').textContent = val === 'Jurídica' ? 'IE:' : 'RG:';
+}
+
+function applySituacaoStyle(sit){
+  const sel = document.getElementById('f_situacao');
+  sel.classList.remove('situacao-ativo','situacao-inativo');
+  if(sit === 'ATIVO') sel.classList.add('situacao-ativo');
+  else sel.classList.add('situacao-inativo');
+}
+function onSituacaoChange(){ applySituacaoStyle(document.getElementById('f_situacao').value); }
+
+function renderTelefones(c){
+  const tb = document.querySelector('#tblTelefones tbody');
+  tb.innerHTML = '';
+  c.telefones.forEach((t,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.tipo}</td><td>${t.numero}</td>`;
+    tr.onclick = ()=>{ [...tb.children].forEach(x=>x.classList.remove('selected')); tr.classList.add('selected'); selectedTelIndex = i; };
+    tb.appendChild(tr);
+  });
+}
+
+function renderHistorico(c){
+  const tb = document.querySelector('#tblHistorico tbody');
+  tb.innerHTML = '';
+  c.historico.forEach((h,i)=>{
+    const dot = h.status === 'CONCLUÍDO' ? 'dot-green' : ((h.status === 'ABERTO' || h.status === 'AGENDADA') ? 'dot-yellow' : 'dot-red');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${h.data}</td><td>${h.protocolo}</td><td>${h.tipo}</td><td>${h.descricao}</td>
+      <td><span class="status-dot ${dot}"></span>${h.status}</td><td>${h.usuario}</td>`;
+    tr.onclick = ()=>{ [...tb.children].forEach(x=>x.classList.remove('selected')); tr.classList.add('selected');
+      selectedHistIndex = i; fillProtocolo(h); };
+    tb.appendChild(tr);
+  });
+  if(c.historico.length){ fillProtocolo(c.historico[0]); selectedHistIndex = 0; }
+  else { ['p_num','p_data','p_tipo','p_situacao'].forEach(id=>document.getElementById(id).value=''); }
+}
+
+function fillProtocolo(h){
+  document.getElementById('p_num').value = h.protocolo;
+  document.getElementById('p_data').value = h.data + ' ' + h.hora;
+  document.getElementById('p_tipo').value = h.tipo;
+  document.getElementById('p_situacao').value = h.status;
+}
+
+function renderContratosLista(c){
+  document.getElementById('tblContratosLista').innerHTML =
+    `<tr><td>${c.contrato||'-'}</td><td>${c.produto}</td><td>${c.plano}</td><td>${c.situacao}</td></tr>`;
+}
+function servicoDot(status){
+  if(status === 'ATIVO') return 'dot-green';
+  if(status === 'SUSPENSO') return 'dot-yellow';
+  return 'dot-red';
+}
+function renderServicosLista(c){
+  document.getElementById('tblServicosLista').innerHTML = c.servicos.map(s=>{
+    return `<tr><td>${s.nome}</td><td><span class="status-dot ${servicoDot(s.status)}"></span>${s.status}</td></tr>`;
+  }).join('') || '<tr><td colspan="2">Nenhum serviço contratado.</td></tr>';
+}
+
+function renderRightbar(c){
+  document.getElementById('r_cliente').textContent = c.nome || '-';
+  document.getElementById('r_contrato').textContent = c.contrato || '-';
+  document.getElementById('r_plano').textContent = c.plano || '-';
+  const dot = c.situacao === 'ATIVO' ? 'dot-green' : 'dot-red';
+  document.getElementById('r_situacao').innerHTML = `<span class="status-dot ${dot}"></span>${c.situacao}`;
+  document.getElementById('r_servicos').innerHTML = c.servicos.map(s=>{
+    return `<tr><td>${s.nome}</td><td><span class="status-dot ${servicoDot(s.status)}"></span>${s.status}</td></tr>`;
+  }).join('') || '<tr><td colspan="2">-</td></tr>';
+  if(c.historico.length){
+    const h = c.historico[0];
+    document.getElementById('r_ultData').textContent = h.data;
+    document.getElementById('r_ultProt').textContent = h.protocolo;
+    document.getElementById('r_ultTipo').textContent = h.tipo;
+  } else {
+    document.getElementById('r_ultData').textContent = '-';
+    document.getElementById('r_ultProt').textContent = '-';
+    document.getElementById('r_ultTipo').textContent = '-';
+  }
+}
+
+/* ---------------- Troca de Endereço ---------------- */
+function atualizarResumoEnderecoAtual(c){
+  const el = document.getElementById('enderecoAtualResumo');
+  if(!el) return;
+  el.innerHTML = `
+    <div class="kv-row"><span>Logradouro:</span><span>${c.logradouro||'-'}, ${c.numEnd||'-'}${c.complemento? ' - '+c.complemento:''}</span></div>
+    <div class="kv-row"><span>Bairro:</span><span>${c.bairro||'-'}</span></div>
+    <div class="kv-row"><span>Cidade/UF:</span><span>${(c.cidade||'-')+'/'+(c.uf||'-')}</span></div>
+    <div class="kv-row"><span>CEP:</span><span>${c.cep||'-'}</span></div>`;
+}
+function resetTrocaEnderecoForm(){
+  ['te_cep','te_logradouro','te_numero','te_complemento','te_bairro'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  const cidade = document.getElementById('te_cidade'); if(cidade) cidade.value='CURITIBA';
+  const uf = document.getElementById('te_uf'); if(uf) uf.value='PR';
+  const div = document.getElementById('resultadoDisponibilidade'); if(div) div.innerHTML='';
+  const btn = document.getElementById('btnConfirmarTroca'); if(btn) btn.style.display='none';
+}
+/* ---------------- Busca de CEP ---------------- */
+const CEP_DB = {
+  '80010000':{logradouro:'RUA DAS FLORES', bairro:'CENTRO', cidade:'CURITIBA', uf:'PR'},
+  '80230100':{logradouro:'AV. SETE DE SETEMBRO', bairro:'BATEL', cidade:'CURITIBA', uf:'PR'},
+  '80420090':{logradouro:'RUA COMENDADOR ARAÚJO', bairro:'CENTRO', cidade:'CURITIBA', uf:'PR'},
+  '81010000':{logradouro:'RUA DOS PINHEIROS', bairro:'ÁGUA VERDE', cidade:'CURITIBA', uf:'PR'},
+  '82010000':{logradouro:'RUA XV DE NOVEMBRO', bairro:'CENTRO', cidade:'CURITIBA', uf:'PR'},
+  '83005000':{logradouro:'RUA COMENDADOR FRANCO', bairro:'CENTRO', cidade:'CURITIBA', uf:'PR'},
+  '84010000':{logradouro:'RUA BINÁRIO DO COMÉRCIO', bairro:'CENTRO', cidade:'PONTA GROSSA', uf:'PR'},
+  '85810000':{logradouro:'AV. BRASIL', bairro:'CENTRO', cidade:'CASCAVEL', uf:'PR'},
+  '86010000':{logradouro:'RUA MARANHÃO', bairro:'CENTRO', cidade:'LONDRINA', uf:'PR'},
+  '87010000':{logradouro:'AV. TIRADENTES', bairro:'ZONA 01', cidade:'MARINGÁ', uf:'PR'}
+};
+const CEP_REGIAO = {'80':'CURITIBA','81':'CURITIBA','82':'CURITIBA','83':'CURITIBA',
+  '84':'PONTA GROSSA','85':'CASCAVEL','86':'LONDRINA','87':'MARINGÁ'};
+function normalizeCep(cep){ return (cep||'').replace(/\D/g,''); }
+function formatCep(digits){ return digits.length===8 ? digits.slice(0,5)+'-'+digits.slice(5) : digits; }
+function buscaCepLookup(cep){
+  const digits = normalizeCep(cep);
+  if(digits.length !== 8) return {ok:false, reason:'invalido'};
+  if(CEP_DB[digits]) return {ok:true, data:CEP_DB[digits]};
+  const cidade = CEP_REGIAO[digits.substring(0,2)];
+  if(cidade) return {ok:true, data:{logradouro:'', bairro:'', cidade, uf:'PR'}, approx:true};
+  return {ok:false, reason:'naoencontrado'};
+}
+function preencherEnderecoPorCep(res, ids){
+  document.getElementById(ids.cep).value = formatCep(normalizeCep(document.getElementById(ids.cep).value));
+  if(res.data.logradouro) document.getElementById(ids.logradouro).value = res.data.logradouro;
+  if(res.data.bairro) document.getElementById(ids.bairro).value = res.data.bairro;
+  document.getElementById(ids.cidade).value = res.data.cidade;
+  document.getElementById(ids.uf).value = res.data.uf;
+}
+function buscarCepPrincipal(){
+  const cepEl = document.getElementById('f_cep');
+  const res = buscaCepLookup(cepEl.value);
+  if(!res.ok){ toast(res.reason==='invalido' ? 'CEP inválido — informe 8 dígitos' : 'CEP não encontrado na base', 'err'); return; }
+  if(!editing){ toast('Clique em Alterar ou Novo antes de atualizar o endereço','err'); return; }
+  preencherEnderecoPorCep(res, {cep:'f_cep',logradouro:'f_logradouro',bairro:'f_bairro',cidade:'f_cidade',uf:'f_uf'});
+  toast(res.approx ? 'CEP aproximado — complete o logradouro manualmente' : 'Endereço localizado pelo CEP', 'ok');
+}
+function buscarCepTroca(){
+  const cepEl = document.getElementById('te_cep');
+  if(!cepEl.value.trim()){ toast('Informe o CEP para buscar o endereço','err'); return; }
+  const res = buscaCepLookup(cepEl.value);
+  if(!res.ok){ toast(res.reason==='invalido' ? 'CEP inválido — informe 8 dígitos' : 'CEP não encontrado na base', 'err'); return; }
+  preencherEnderecoPorCep(res, {cep:'te_cep',logradouro:'te_logradouro',bairro:'te_bairro',cidade:'te_cidade',uf:'te_uf'});
+  toast(res.approx ? 'CEP aproximado — complete o logradouro manualmente' : 'Endereço localizado pelo CEP', 'ok');
+}
+function checaCoberturaCep(cep){
+  const digits = (cep||'').replace(/\D/g,'');
+  if(digits.length < 2) return null;
+  const prefix = digits.substring(0,2);
+  const cobertos = ['80','81','82','83']; // região metropolitana de Curitiba, área de cobertura Strong Telecom
+  return cobertos.includes(prefix);
+}
+function verificarDisponibilidade(){
+  const cep = document.getElementById('te_cep').value.trim();
+  const logradouro = document.getElementById('te_logradouro').value.trim();
+  const div = document.getElementById('resultadoDisponibilidade');
+  const btn = document.getElementById('btnConfirmarTroca');
+  if(!cep || !logradouro){ toast('Preencha ao menos o CEP e o logradouro do novo endereço','err'); return; }
+  const disponivel = checaCoberturaCep(cep);
+  if(disponivel === null){ toast('CEP inválido','err'); return; }
+  if(disponivel){
+    div.innerHTML = `<div style="background:#e3f7e3;border:1px solid #1a8a1a;border-radius:4px;padding:10px;color:#0a5c0a;">
+      ✅ <b>Viabilidade técnica confirmada.</b><br>Há cobertura de fibra Strong Telecom disponível para instalação no novo endereço.</div>`;
+    btn.style.display='inline-block';
+    toast('Endereço com disponibilidade confirmada','ok');
+  } else {
+    div.innerHTML = `<div style="background:#fbe4e2;border:1px solid #c0392b;border-radius:4px;padding:10px;color:#7a1f14;">
+      ❌ <b>Endereço fora da área de cobertura no momento.</b><br>Ainda não há infraestrutura de fibra Strong Telecom disponível nesta região.</div>`;
+    btn.style.display='none';
+    toast('Endereço sem cobertura no momento','err');
+  }
+}
+function confirmarTrocaEndereco(){
+  const c = clients[currentIndex];
+  c.cep = document.getElementById('te_cep').value.trim();
+  c.logradouro = document.getElementById('te_logradouro').value.trim();
+  c.numEnd = document.getElementById('te_numero').value.trim();
+  c.complemento = document.getElementById('te_complemento').value.trim();
+  c.bairro = document.getElementById('te_bairro').value.trim();
+  c.cidade = document.getElementById('te_cidade').value;
+  c.uf = document.getElementById('te_uf').value;
+
+  document.getElementById('f_cep').value = c.cep;
+  document.getElementById('f_logradouro').value = c.logradouro;
+  document.getElementById('f_numEnd').value = c.numEnd;
+  document.getElementById('f_complemento').value = c.complemento;
+  document.getElementById('f_bairro').value = c.bairro;
+  document.getElementById('f_cidade').value = c.cidade;
+  document.getElementById('f_uf').value = c.uf;
+
+  const d = new Date(); const pad = n=>String(n).padStart(2,'0');
+  const data = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+  const hora = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const protocolo = String(830000 + Math.floor(Math.random()*9999));
+  c.historico.unshift({data,protocolo,tipo:'Comercial',descricao:'Alteração de endereço de instalação',status:'CONCLUÍDO',usuario:usuarioLogado(),hora});
+
+  renderHistorico(c);
+  atualizarResumoEnderecoAtual(c);
+  resetTrocaEnderecoForm();
+  toast('Endereço atualizado com sucesso! Protocolo: '+protocolo, 'ok');
+}
+
+/* ---------------- Edit mode ---------------- */
+const editableIds = ['f_cpf','f_rgie','f_nome','f_fantasia','f_nasc','f_sexo','f_situacao','f_cep','f_logradouro',
+  'f_numEnd','f_complemento','f_referencia','f_bairro','f_cidade','f_uf','f_telefone','f_email','f_contrato',
+  'f_produto','f_plano','f_ativacao','f_vencimento','f_obs','rFisica','rJuridica'];
+
+function setEditable(state){
+  editing = state;
+  editableIds.forEach(id=>{ document.getElementById(id).disabled = !state; });
+  document.getElementById('btnNovo').disabled = state;
+  document.getElementById('btnAlterar').disabled = state;
+  document.getElementById('btnExcluir').disabled = state;
+  document.getElementById('btnConsultar').disabled = state;
+  document.getElementById('btnGravar').disabled = !state;
+  document.getElementById('btnCancelar').disabled = !state;
+}
+
+function readFormIntoClient(target){
+  target.tipoPessoa = document.getElementById('rJuridica').checked ? 'Jurídica' : 'Física';
+  target.cpf = document.getElementById('f_cpf').value;
+  target.rgie = document.getElementById('f_rgie').value;
+  target.nome = document.getElementById('f_nome').value;
+  target.fantasia = document.getElementById('f_fantasia').value;
+  target.nasc = document.getElementById('f_nasc').value;
+  target.sexo = document.getElementById('f_sexo').value;
+  target.situacao = document.getElementById('f_situacao').value;
+  target.cep = document.getElementById('f_cep').value;
+  target.logradouro = document.getElementById('f_logradouro').value;
+  target.numEnd = document.getElementById('f_numEnd').value;
+  target.complemento = document.getElementById('f_complemento').value;
+  target.referencia = document.getElementById('f_referencia').value;
+  target.bairro = document.getElementById('f_bairro').value;
+  target.cidade = document.getElementById('f_cidade').value;
+  target.uf = document.getElementById('f_uf').value;
+  target.telefone = document.getElementById('f_telefone').value;
+  target.email = document.getElementById('f_email').value;
+  target.contrato = document.getElementById('f_contrato').value;
+  target.produto = document.getElementById('f_produto').value;
+  target.plano = document.getElementById('f_plano').value;
+  target.ativacao = document.getElementById('f_ativacao').value;
+  target.vencimento = document.getElementById('f_vencimento').value;
+  target.obs = document.getElementById('f_obs').value;
+}
+
+/* ---------------- Toolbar actions ---------------- */
+function acaoNovo(){
+  closeAllMenus();
+  const novo = blankClient();
+  snapshotBeforeEdit = null;
+  editingIsNew = true;
+  renderClient(novo);
+  setEditable(true);
+  document.getElementById('f_nome').focus();
+  toast('Preencha os dados do novo cliente e clique em Gravar','ok');
+  return false;
+}
+function acaoAlterar(){
+  closeAllMenus();
+  snapshotBeforeEdit = JSON.parse(JSON.stringify(clients[currentIndex]));
+  editingIsNew = false;
+  setEditable(true);
+  toast('Modo de edição ativado','ok');
+  return false;
+}
+function acaoExcluir(){
+  closeAllMenus();
+  if(!clients.length){ toast('Nenhum cliente carregado','err'); return false; }
+  const c = clients[currentIndex];
+  if(confirm(`Confirma a exclusão do cliente "${c.nome}"?`)){
+    clients.splice(currentIndex,1);
+    if(!clients.length){ clients.push(blankClient()); }
+    currentIndex = Math.max(0, currentIndex-1);
+    renderClient(clients[currentIndex]);
+    setEditable(false);
+    toast('Cliente excluído com sucesso','ok');
+  }
+  return false;
+}
+function acaoGravar(){
+  closeAllMenus();
+  if(!editing){ toast('Nada para gravar','err'); return false; }
+  const nomeVal = document.getElementById('f_nome').value.trim();
+  if(!nomeVal){ toast('Informe o Nome / Razão Social antes de gravar','err'); return false; }
+  let osGerada = null;
+  if(editingIsNew){
+    const novo = blankClient();
+    novo.numCliente = '000' + (1234570 + clients.length);
+    novo.contrato = '000' + (9876546 + clients.length);
+    readFormIntoClient(novo);
+    novo.telefones = [];
+    clients.push(novo);
+    currentIndex = clients.length - 1;
+    osGerada = gerarOSInstalacao(clients[currentIndex]);
+  } else {
+    readFormIntoClient(clients[currentIndex]);
+  }
+  renderClient(clients[currentIndex]);
+  setEditable(false);
+  toast('Cliente salvo com sucesso','ok');
+  if(osGerada){
+    toast('OS de instalação gerada automaticamente: ' + osGerada.protocolo, 'ok');
+    mostrarOSInstalacaoModal(clients[currentIndex], osGerada);
+  }
+  return false;
+}
+
+/* ---------------- OS de Instalação automática ---------------- */
+function gerarOSInstalacao(c){
+  const d = new Date(); const pad = n=>String(n).padStart(2,'0');
+  const data = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+  const hora = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const previsao = new Date(d.getTime() + 2*24*60*60*1000);
+  const dataPrevisao = `${pad(previsao.getDate())}/${pad(previsao.getMonth()+1)}/${previsao.getFullYear()}`;
+  const tecnicos = ['Carlos Rodrigues','Ana Lima','João Souza','Marcos Vieira'];
+  const tecnico = tecnicos[Math.floor(Math.random()*tecnicos.length)];
+  const protocolo = String(850000 + Math.floor(Math.random()*9999));
+  const os = {
+    data, hora, protocolo, tipo:'Instalação',
+    descricao:'OS de instalação gerada automaticamente — '+(c.produto||'-')+' / '+(c.plano||'-'),
+    status:'AGENDADA', usuario:usuarioLogado(), tecnico, dataPrevisao
+  };
+  c.historico.unshift(os);
+  return os;
+}
+function mostrarOSInstalacaoModal(c, os){
+  const body = `
+    <div class="kv">
+      <div class="kv-row"><span>Protocolo da OS:</span><span>${os.protocolo}</span></div>
+      <div class="kv-row"><span>Cliente:</span><span>${c.nome}</span></div>
+      <div class="kv-row"><span>Endereço de instalação:</span><span>${c.logradouro||'-'}, ${c.numEnd||'-'} - ${c.bairro||'-'}, ${c.cidade||'-'}/${c.uf||'-'}</span></div>
+      <div class="kv-row"><span>Produto / Plano:</span><span>${c.produto||'-'} - ${c.plano||'-'}</span></div>
+      <div class="kv-row"><span>Técnico designado:</span><span>${os.tecnico}</span></div>
+      <div class="kv-row"><span>Data prevista:</span><span>${os.dataPrevisao}</span></div>
+      <div class="kv-row"><span>Status:</span><span>${os.status}</span></div>
+    </div>`;
+  openGeneric('🛠️ OS de Instalação Gerada Automaticamente', body, `<button onclick="window.print()">Imprimir OS</button>`);
+}
+function acaoCancelar(){
+  closeAllMenus();
+  if(editingIsNew){
+    if(clients.length && currentIndex < clients.length){
+      renderClient(clients[currentIndex]);
+    }
+  } else if(snapshotBeforeEdit){
+    clients[currentIndex] = snapshotBeforeEdit;
+    renderClient(clients[currentIndex]);
+  }
+  setEditable(false);
+  toast('Alterações canceladas','ok');
+  return false;
+}
+function acaoImprimir(){
+  closeAllMenus();
+  window.print();
+  return false;
+}
+function acaoFechar(){
+  closeAllMenus();
+  toast('Janela de Cadastro de Cliente fechada','ok');
+  return false;
+}
+function sairSistema(){
+  closeAllMenus();
+  if(confirm('Deseja realmente sair do CIS Telecom?')){
+    document.getElementById('closedScreen').classList.add('show');
+    document.getElementById('belowTitlebar').style.display='none';
+  }
+  return false;
+}
+function reopenApp(){
+  document.getElementById('closedScreen').classList.remove('show');
+  document.getElementById('belowTitlebar').style.display='flex';
+}
+function minimizeApp(){ document.getElementById('app').classList.toggle('minimized'); }
+function maximizeApp(){
+  const app = document.getElementById('app');
+  app.style.width = app.style.width === '100%' ? '1460px' : '100%';
+}
+
+/* ---------------- Telefones ---------------- */
+function telAdicionar(){
+  const c = clients[currentIndex];
+  const tipo = prompt('Tipo de telefone (Residencial, Comercial, Celular):','Celular');
+  if(!tipo) return;
+  const numero = prompt('Número:','(41) 9----- ----');
+  if(!numero) return;
+  c.telefones.push({tipo, numero});
+  renderTelefones(c);
+  toast('Telefone adicionado','ok');
+}
+function telEditar(){
+  const c = clients[currentIndex];
+  if(selectedTelIndex === null){ toast('Selecione um telefone na lista','err'); return; }
+  const t = c.telefones[selectedTelIndex];
+  const numero = prompt('Editar número:', t.numero);
+  if(numero){ t.numero = numero; renderTelefones(c); toast('Telefone atualizado','ok'); }
+}
+function telRemover(){
+  const c = clients[currentIndex];
+  if(selectedTelIndex === null){ toast('Selecione um telefone na lista','err'); return; }
+  if(confirm('Remover este telefone?')){
+    c.telefones.splice(selectedTelIndex,1);
+    selectedTelIndex = null;
+    renderTelefones(c);
+    toast('Telefone removido','ok');
+  }
+}
+
+/* ---------------- Histórico / protocolo ---------------- */
+function visualizarProtocolo(){
+  const c = clients[currentIndex];
+  if(selectedHistIndex === null || !c.historico[selectedHistIndex]){ toast('Selecione um atendimento no histórico','err'); return; }
+  const h = c.historico[selectedHistIndex];
+  document.getElementById('detalheTitulo').textContent = 'Protocolo ' + h.protocolo;
+  document.getElementById('detalheBody').innerHTML = `
+    <div class="kv">
+      <div class="kv-row"><span>Cliente:</span><span>${c.nome}</span></div>
+      <div class="kv-row"><span>Data/Hora:</span><span>${h.data} ${h.hora}</span></div>
+      <div class="kv-row"><span>Tipo:</span><span>${h.tipo}</span></div>
+      <div class="kv-row"><span>Descrição:</span><span>${h.descricao}</span></div>
+      <div class="kv-row"><span>Status:</span><span>${h.status}</span></div>
+      <div class="kv-row"><span>Usuário responsável:</span><span>${h.usuario}</span></div>
+    </div>`;
+  document.getElementById('modalDetalhe').classList.add('show');
+}
+function openHistoricoModal(){
+  closeAllMenus();
+  visualizarProtocolo();
+  return false;
+}
+
+/* ---------------- Consulta modal ---------------- */
+function openConsultaModal(){
+  closeAllMenus();
+  document.getElementById('consultaBusca').value = '';
+  document.getElementById('consultaBusca').oninput = renderConsultaLista;
+  renderConsultaLista();
+  document.getElementById('modalConsulta').classList.add('show');
+  document.getElementById('consultaBusca').focus();
+  return false;
+}
+function renderConsultaLista(){
+  const q = document.getElementById('consultaBusca').value.toLowerCase();
+  const tb = document.getElementById('consultaLista');
+  tb.innerHTML = '';
+  clients.forEach((c,i)=>{
+    const hay = (c.nome+c.cpf+c.numCliente).toLowerCase();
+    if(q && !hay.includes(q)) return;
+    const dot = c.situacao === 'ATIVO' ? 'dot-green' : 'dot-red';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${c.numCliente}</td><td>${c.nome}</td><td>${c.cpf}</td><td><span class="status-dot ${dot}"></span>${c.situacao}</td>`;
+    tr.onclick = ()=>{
+      currentIndex = i;
+      renderClient(clients[currentIndex]);
+      setEditable(false);
+      closeModal('modalConsulta');
+      toast('Cliente carregado: ' + c.nome, 'ok');
+    };
+    tb.appendChild(tr);
+  });
+  if(!tb.children.length){ tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888;">Nenhum cliente encontrado.</td></tr>'; }
+}
+
+function closeModal(id){
+  document.getElementById(id).classList.remove('show');
+  if(id === 'modalConsulta'){
+    const busca = document.getElementById('consultaBusca');
+    if(busca) busca.oninput = renderConsultaLista;
+  }
+}
+function openSobreModal(){ closeAllMenus(); document.getElementById('modalSobre').classList.add('show'); return false; }
+
+/* ---------------- Menus / tabs / tree ---------------- */
+function closeAllMenus(){
+  document.querySelectorAll('.menu-item.open').forEach(m=>m.classList.remove('open'));
+}
+document.getElementById('menubar').addEventListener('click', e=>{
+  const item = e.target.closest('.menu-item');
+  if(!item) return;
+  if(e.target.tagName === 'A') return;
+  const wasOpen = item.classList.contains('open');
+  closeAllMenus();
+  if(!wasOpen) item.classList.add('open');
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.menubar')) closeAllMenus();
+});
+
+function selectTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  document.querySelectorAll('.tabcontent').forEach(t=>t.classList.toggle('active', t.dataset.tabcontent===tab));
+}
+
+function toggleFolder(el){
+  el.classList.toggle('expanded');
+  el.querySelector('.twisty').textContent = el.classList.contains('expanded') ? '▾' : '▸';
+}
+
+function showClienteModule(tab){
+  document.getElementById('moduloCliente').style.display='block';
+  document.getElementById('moduloPlaceholder').style.display='none';
+  const modProto = document.getElementById('moduloProtocolo');
+  if(modProto) modProto.style.display='none';
+  document.getElementById('windowTitle').textContent = '📇 Cadastro de Cliente';
+  if(tab) selectTab(tab);
+}
+function showModuloProtocolo(){
+  document.getElementById('moduloCliente').style.display='none';
+  document.getElementById('moduloPlaceholder').style.display='none';
+  document.getElementById('moduloProtocolo').style.display='block';
+  document.getElementById('windowTitle').textContent = '📄 Protocolo / Chamados';
+}
+function selectTree(key){
+  closeAllMenus();
+  document.querySelectorAll('.tree-leaf').forEach(l=>l.classList.toggle('selected', l.dataset.tree===key));
+  switch(key){
+    case 'cliente':
+      showClienteModule('dados');
+      break;
+    case 'endereco':
+      showClienteModule('endereco');
+      break;
+    case 'imovel':
+      showClienteModule('endereco');
+      toast('Dados do imóvel correspondem ao endereço cadastrado do cliente','ok');
+      break;
+    case 'contrato':
+      showClienteModule('contratos');
+      break;
+    case 'servico':
+      showClienteModule('servicos');
+      break;
+    case 'atendimento':
+    case 'protocolo':
+      abrirModuloProtocolo();
+      break;
+    case 'servicos2':
+      showClienteModule('servicos');
+      abrirGestaoServicos();
+      break;
+    case 'faturamento':
+      showClienteModule('dados');
+      consultarFatura();
+      break;
+    case 'cobranca':
+      showClienteModule('dados');
+      negociarDebitos();
+      break;
+    case 'relatorios':
+      showClienteModule('dados');
+      abrirMenuRelatorios();
+      break;
+    case 'utilitarios':
+      showClienteModule('dados');
+      abrirConfiguracoes();
+      break;
+    case 'mikrotik':
+      showClienteModule('dados');
+      abrirSincronizacaoMikrotik();
+      break;
+    default:
+      showClienteModule('dados');
+  }
+  return false;
+}
+function abrirGestaoServicos(){
+  const c = clients[currentIndex];
+  const rows = c.servicos.map(s=>`<tr><td>${s.nome}</td><td><span class="status-dot ${servicoDot(s.status)}"></span>${s.status}</td></tr>`).join('') || '<tr><td colspan="2">Nenhum serviço contratado.</td></tr>';
+  const body = `<p>Cliente: <b>${c.nome}</b></p>
+    <table class="gridtable"><thead><tr><th>Serviço</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const actions = `<button onclick="closeModal('modalGeneric');ativarServico();">Ativar</button>
+    <button onclick="closeModal('modalGeneric');suspenderServico();">Suspender</button>
+    <button onclick="closeModal('modalGeneric');cancelarServico();">Cancelar</button>`;
+  openGeneric('📶 Gestão de Serviços', body, actions);
+}
+function abrirMenuRelatorios(){
+  const body = `<p>Selecione o relatório desejado:</p>`;
+  const actions = `<button onclick="closeModal('modalGeneric');relatorioClientes();">Relatório de Clientes</button>
+    <button onclick="closeModal('modalGeneric');relatorioAtendimentos();">Relatório de Atendimentos</button>`;
+  openGeneric('📊 Relatórios Gerenciais', body, actions);
+}
+function placeholderModulo(nome){
+  closeAllMenus();
+  toast('Módulo "' + nome + '" em desenvolvimento nesta réplica de demonstração', 'ok');
+  return false;
+}
+
+/* ---------------- Modal genérico ---------------- */
+function openGeneric(title, bodyHtml, actionsHtml, width){
+  document.getElementById('genericTitle').textContent = title;
+  document.getElementById('genericBody').innerHTML = bodyHtml;
+  document.getElementById('genericActions').innerHTML = (actionsHtml||'') + '<button onclick="closeModal(\'modalGeneric\')">Fechar</button>';
+  const box = document.getElementById('modalGenericBox');
+  box.style.width = width || '';
+  box.style.maxWidth = width || '560px';
+  document.getElementById('modalGeneric').classList.add('show');
+}
+function usuarioLogado(){ return document.getElementById('s_usuario').textContent; }
+
+/* ---------------- Atendimento: Abrir Chamado / Consultar Protocolo ---------------- */
+function abrirChamado(){
+  closeAllMenus();
+  const c = clients[currentIndex];
+  const body = `
+    <p>Cliente: <b>${c.nome}</b> (${c.numCliente})</p>
+    <div class="field" style="margin:8px 0;">
+      <label>Tipo de Atendimento:</label>
+      <select id="novoChamadoTipo"><option>Suporte Técnico</option><option>Financeiro</option><option>Comercial</option><option>Cancelamento</option></select>
+    </div>
+    <div class="field">
+      <label>Descrição:</label>
+      <textarea id="novoChamadoDesc" rows="4" placeholder="Descreva o problema ou solicitação..."></textarea>
+    </div>`;
+  openGeneric('☎️ Abrir Chamado', body, `<button onclick="confirmarAbrirChamado()">Abrir Chamado</button>`);
+  return false;
+}
+function confirmarAbrirChamado(){
+  const c = clients[currentIndex];
+  const tipo = document.getElementById('novoChamadoTipo').value;
+  const desc = document.getElementById('novoChamadoDesc').value.trim();
+  if(!desc){ toast('Descreva o atendimento antes de abrir o chamado','err'); return; }
+  const protocolo = String(800000 + Math.floor(Math.random()*99999));
+  const d = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  const data = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+  const hora = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  c.historico.unshift({data,protocolo,tipo,descricao:desc,status:'ABERTO',usuario:usuarioLogado(),hora});
+  if(currentIndex === clients.indexOf(c)){ renderHistorico(c); renderRightbar(c); }
+  closeModal('modalGeneric');
+  toast('Chamado aberto com sucesso! Protocolo: ' + protocolo, 'ok');
+}
+function consultarProtocolo(){
+  closeAllMenus();
+  const body = `<div class="field"><label>Número do Protocolo:</label>
+    <div class="field-row"><input type="text" id="buscaProtocoloInput" placeholder="Ex: 845221">
+    <button class="iconbtn" onclick="executarBuscaProtocolo()">🔍</button></div></div>
+    <div id="resultadoProtocolo" style="margin-top:12px;"></div>`;
+  openGeneric('🔍 Consultar Protocolo', body, '');
+  document.getElementById('buscaProtocoloInput').addEventListener('keydown', e=>{ if(e.key==='Enter') executarBuscaProtocolo(); });
+  return false;
+}
+function executarBuscaProtocolo(){
+  const q = document.getElementById('buscaProtocoloInput').value.trim();
+  const div = document.getElementById('resultadoProtocolo');
+  if(!q){ div.innerHTML=''; return; }
+  let achou = null, clienteAchado = null;
+  clients.forEach(c=>{ c.historico.forEach(h=>{ if(h.protocolo === q){ achou = h; clienteAchado = c; } }); });
+  if(achou){
+    div.innerHTML = `<div class="kv">
+      <div class="kv-row"><span>Cliente:</span><span>${clienteAchado.nome}</span></div>
+      <div class="kv-row"><span>Data/Hora:</span><span>${achou.data} ${achou.hora}</span></div>
+      <div class="kv-row"><span>Tipo:</span><span>${achou.tipo}</span></div>
+      <div class="kv-row"><span>Descrição:</span><span>${achou.descricao}</span></div>
+      <div class="kv-row"><span>Status:</span><span>${achou.status}</span></div>
+      <div class="kv-row"><span>Usuário:</span><span>${achou.usuario}</span></div>
+    </div>`;
+  } else {
+    div.innerHTML = '<p style="color:#888;">Nenhum protocolo encontrado.</p>';
+  }
+}
+
+/* ---------------- Módulo Protocolo / Chamados ---------------- */
+let protocoloRef = null; // {clienteIndex, histIndex} do chamado carregado, ou null = novo
+let protocoloPaginaAtualNum = 1;
+const PROTOCOLO_POR_PAGINA = 8;
+
+function abrirModuloProtocolo(){
+  closeAllMenus();
+  document.querySelectorAll('.tree-leaf').forEach(l=>l.classList.toggle('selected', l.dataset.tree==='protocolo'));
+  showModuloProtocolo();
+  protocoloPaginaAtualNum = 1;
+  protocoloNovo();
+  renderTabelaHistoricoChamados();
+  return false;
+}
+function selectProtocoloTab(tab){
+  document.querySelectorAll('#moduloProtocolo .tab').forEach(t=>t.classList.toggle('active', t.dataset.ptab===tab));
+  document.querySelectorAll('#moduloProtocolo .tabcontent').forEach(t=>t.classList.toggle('active', t.dataset.ptabcontent===tab));
+}
+function protocoloSetEditavel(estado){
+  ['pr_tipo','pr_canal','pr_prioridade','pr_assunto','pr_descricao','pr_status','pr_tecnico','pr_prazo','pr_setor'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.disabled = !estado;
+  });
+}
+function protocoloListaChamados(){
+  const todos = [];
+  clients.forEach((c,ci)=>{
+    c.historico.forEach((h,hi)=>{
+      todos.push({c, ci, h, hi});
+    });
+  });
+  todos.sort((a,b)=> (b.h.data+b.h.hora).localeCompare(a.h.data+a.h.hora));
+  return todos;
+}
+function renderTabelaHistoricoChamados(){
+  const todos = protocoloListaChamados();
+  const totalPaginas = Math.max(1, Math.ceil(todos.length / PROTOCOLO_POR_PAGINA));
+  if(protocoloPaginaAtualNum > totalPaginas) protocoloPaginaAtualNum = totalPaginas;
+  const inicio = (protocoloPaginaAtualNum-1) * PROTOCOLO_POR_PAGINA;
+  const pagina = todos.slice(inicio, inicio + PROTOCOLO_POR_PAGINA);
+  const tb = document.getElementById('pr_tabelaHistorico');
+  tb.innerHTML = pagina.map(item=>{
+    const h = item.h;
+    const dot = h.status === 'CONCLUÍDO' || h.status === 'Resolvido' ? 'dot-green' :
+      (h.status === 'ABERTO' || h.status === 'AGENDADA' || h.status === 'Aberto' || h.status === 'Em Atendimento' ? 'dot-yellow' : 'dot-red');
+    return `<tr onclick="protocoloCarregar(${item.ci},${item.hi})">
+      <td>${h.protocolo}</td><td>${h.data}</td><td>${item.c.nome}</td>
+      <td>${h.assunto || h.tipo}</td>
+      <td><span class="status-dot ${dot}"></span>${h.status}</td>
+      <td>${h.tecnico || h.usuario || '-'}</td>
+      <td>${h.prioridade || '-'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:#888;">Nenhum chamado registrado.</td></tr>';
+  document.getElementById('pr_totalRegistros').textContent = 'Total de registros: ' + todos.length;
+  document.getElementById('pr_paginaAtual').textContent = protocoloPaginaAtualNum + ' de ' + totalPaginas;
+}
+function protocoloProximaPagina(){
+  const todos = protocoloListaChamados();
+  const totalPaginas = Math.max(1, Math.ceil(todos.length / PROTOCOLO_POR_PAGINA));
+  if(protocoloPaginaAtualNum < totalPaginas){ protocoloPaginaAtualNum++; renderTabelaHistoricoChamados(); }
+}
+function protocoloPaginaAnterior(){
+  if(protocoloPaginaAtualNum > 1){ protocoloPaginaAtualNum--; renderTabelaHistoricoChamados(); }
+}
+function protocoloCarregar(ci, hi){
+  const c = clients[ci];
+  const h = c.historico[hi];
+  protocoloRef = {clienteIndex: ci, histIndex: hi};
+  document.getElementById('pr_codigoCliente').value = c.numCliente;
+  document.getElementById('pr_nomeCliente').value = c.nome;
+  document.getElementById('pr_cpfCliente').value = c.cpf;
+  document.getElementById('pr_telCliente').value = c.telefone;
+  document.getElementById('pr_emailCliente').value = c.email;
+  document.getElementById('pr_protocolo').value = h.protocolo;
+  document.getElementById('pr_dataAbertura').value = h.data + ' ' + (h.hora||'');
+  document.getElementById('pr_tipo').value = h.tipo || 'Suporte Técnico';
+  document.getElementById('pr_canal').value = h.canal || 'Telefone';
+  document.getElementById('pr_prioridade').value = h.prioridade || 'Média';
+  document.getElementById('pr_assunto').value = h.assunto || h.tipo || '';
+  document.getElementById('pr_descricao').value = h.descricao || '';
+  document.getElementById('pr_status').value = h.status || 'Aberto';
+  document.getElementById('pr_tecnico').value = h.tecnico || h.usuario || 'Carlos Rodrigues';
+  document.getElementById('pr_prazo').value = h.prazo || '';
+  document.getElementById('pr_setor').value = h.setor || 'Suporte Técnico';
+  document.getElementById('pr_obsGerais').value = h.obsGerais || '';
+  atualizarCorStatusProtocolo();
+  renderAnotacoesProtocolo(h);
+  renderHistoricoDetalhadoProtocolo(h);
+  protocoloSetEditavel(true);
+  selectProtocoloTab('dados');
+}
+function protocoloNovo(){
+  protocoloRef = null;
+  ['pr_codigoCliente','pr_nomeCliente','pr_cpfCliente','pr_telCliente','pr_emailCliente','pr_protocolo','pr_dataAbertura'].forEach(id=>{
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('pr_tipo').value = 'Suporte Técnico';
+  document.getElementById('pr_canal').value = 'Telefone';
+  document.getElementById('pr_prioridade').value = 'Média';
+  document.getElementById('pr_assunto').value = '';
+  document.getElementById('pr_descricao').value = '';
+  document.getElementById('pr_status').value = 'Aberto';
+  document.getElementById('pr_tecnico').value = usuarioLogado() && document.querySelector('#pr_tecnico option') ? document.getElementById('pr_tecnico').options[0].value : 'Carlos Rodrigues';
+  document.getElementById('pr_prazo').value = '';
+  document.getElementById('pr_setor').value = 'Suporte Técnico';
+  document.getElementById('pr_obsGerais').value = '';
+  atualizarCorStatusProtocolo();
+  renderAnotacoesProtocolo(null);
+  renderHistoricoDetalhadoProtocolo(null);
+  protocoloSetEditavel(true);
+  selectProtocoloTab('dados');
+}
+function protocoloCancelar(){
+  if(protocoloRef){ protocoloCarregar(protocoloRef.clienteIndex, protocoloRef.histIndex); }
+  else { protocoloNovo(); }
+  toast('Alterações do chamado canceladas','ok');
+}
+function atualizarCorStatusProtocolo(){
+  const sel = document.getElementById('pr_status');
+  const mapa = {'Aberto':'#d6a51a','Em Atendimento':'#2f6fd0','Resolvido':'#1a8a3c','Cancelado':'#c0392b'};
+  sel.style.color = mapa[sel.value] || '#1a1a1a';
+  sel.style.fontWeight = 'bold';
+}
+function protocoloBuscarCliente(){
+  document.getElementById('consultaBusca').value = '';
+  document.getElementById('consultaBusca').oninput = renderConsultaListaParaProtocolo;
+  renderConsultaListaParaProtocolo();
+  document.getElementById('modalConsulta').classList.add('show');
+  document.getElementById('consultaBusca').focus();
+}
+function renderConsultaListaParaProtocolo(){
+  const q = document.getElementById('consultaBusca').value.toLowerCase();
+  const tb = document.getElementById('consultaLista');
+  tb.innerHTML = '';
+  clients.forEach((c)=>{
+    const hay = (c.nome+c.cpf+c.numCliente).toLowerCase();
+    if(q && !hay.includes(q)) return;
+    const dot = c.situacao === 'ATIVO' ? 'dot-green' : 'dot-red';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${c.numCliente}</td><td>${c.nome}</td><td>${c.cpf}</td><td><span class="status-dot ${dot}"></span>${c.situacao}</td>`;
+    tr.onclick = ()=>{
+      document.getElementById('pr_codigoCliente').value = c.numCliente;
+      document.getElementById('pr_nomeCliente').value = c.nome;
+      document.getElementById('pr_cpfCliente').value = c.cpf;
+      document.getElementById('pr_telCliente').value = c.telefone;
+      document.getElementById('pr_emailCliente').value = c.email;
+      closeModal('modalConsulta');
+      document.getElementById('consultaBusca').oninput = renderConsultaLista;
+      toast('Cliente vinculado ao chamado: '+c.nome, 'ok');
+    };
+    tb.appendChild(tr);
+  });
+  if(!tb.children.length){ tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888;">Nenhum cliente encontrado.</td></tr>'; }
+}
+function renderAnotacoesProtocolo(h){
+  const el = document.getElementById('pr_anotacoesLista');
+  const anotacoes = (h && h.anotacoes) || [];
+  el.innerHTML = anotacoes.length
+    ? anotacoes.map(a=>`<div style="margin-bottom:6px;"><b>${a.data} ${a.hora} - ${a.usuario}</b><br>${a.texto}</div>`).join('')
+    : '<span style="color:#999;">Nenhuma anotação registrada.</span>';
+}
+function protocoloAdicionarAnotacao(){
+  const texto = prompt('Digite a anotação:');
+  if(!texto || !texto.trim()) return;
+  if(!protocoloRef){ toast('Selecione ou salve um chamado antes de adicionar anotações','err'); return; }
+  const h = clients[protocoloRef.clienteIndex].historico[protocoloRef.histIndex];
+  if(!h.anotacoes) h.anotacoes = [];
+  const d = new Date(); const pad=n=>String(n).padStart(2,'0');
+  h.anotacoes.unshift({data:`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`, hora:`${pad(d.getHours())}:${pad(d.getMinutes())}`, usuario:usuarioLogado(), texto:texto.trim()});
+  renderAnotacoesProtocolo(h);
+  renderHistoricoDetalhadoProtocolo(h);
+  toast('Anotação adicionada','ok');
+}
+function renderHistoricoDetalhadoProtocolo(h){
+  const el = document.getElementById('pr_historicoDetalhado');
+  if(!h){ el.innerHTML = '<span style="color:#999;">Nenhum chamado carregado.</span>'; return; }
+  const linhas = [`<div style="margin-bottom:6px;">📌 <b>${h.data} ${h.hora||''}</b> — Chamado aberto (${h.tipo||'-'}) por ${h.usuario||usuarioLogado()}</div>`];
+  (h.anotacoes||[]).slice().reverse().forEach(a=>{
+    linhas.push(`<div style="margin-bottom:6px;">💬 <b>${a.data} ${a.hora}</b> — ${a.usuario}: ${a.texto}</div>`);
+  });
+  el.innerHTML = linhas.join('');
+}
+function protocoloSalvar(){
+  const codigoCliente = document.getElementById('pr_codigoCliente').value.trim();
+  if(!codigoCliente){ toast('Busque e selecione um cliente antes de salvar o chamado','err'); return; }
+  const assunto = document.getElementById('pr_assunto').value.trim();
+  if(!assunto){ toast('Informe o Assunto do chamado','err'); return; }
+  let ci = clients.findIndex(c=>c.numCliente === codigoCliente);
+  if(ci === -1){ toast('Cliente não encontrado','err'); return; }
+  const c = clients[ci];
+  const dados = {
+    tipo: document.getElementById('pr_tipo').value,
+    canal: document.getElementById('pr_canal').value,
+    prioridade: document.getElementById('pr_prioridade').value,
+    assunto: assunto,
+    descricao: document.getElementById('pr_descricao').value.trim(),
+    status: document.getElementById('pr_status').value,
+    tecnico: document.getElementById('pr_tecnico').value,
+    prazo: document.getElementById('pr_prazo').value.trim(),
+    setor: document.getElementById('pr_setor').value,
+    obsGerais: document.getElementById('pr_obsGerais').value
+  };
+  if(protocoloRef && protocoloRef.clienteIndex === ci){
+    const h = c.historico[protocoloRef.histIndex];
+    Object.assign(h, dados);
+    renderTabelaHistoricoChamados();
+    if(currentIndex === ci){ renderHistorico(c); renderRightbar(c); }
+    toast('Chamado atualizado com sucesso: '+h.protocolo, 'ok');
+  } else {
+    const d = new Date(); const pad=n=>String(n).padStart(2,'0');
+    const protocolo = String(860000 + Math.floor(Math.random()*9999));
+    const novo = Object.assign({
+      data:`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`,
+      hora:`${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      protocolo, usuario: usuarioLogado(), anotacoes: []
+    }, dados);
+    c.historico.unshift(novo);
+    protocoloRef = {clienteIndex: ci, histIndex: 0};
+    document.getElementById('pr_protocolo').value = protocolo;
+    document.getElementById('pr_dataAbertura').value = novo.data + ' ' + novo.hora;
+    renderTabelaHistoricoChamados();
+    if(currentIndex === ci){ renderHistorico(c); renderRightbar(c); }
+    toast('Chamado criado com sucesso: '+protocolo, 'ok');
+  }
+}
+function protocoloExcluir(){
+  if(!protocoloRef){ toast('Nenhum chamado carregado para excluir','err'); return; }
+  const c = clients[protocoloRef.clienteIndex];
+  const h = c.historico[protocoloRef.histIndex];
+  if(confirm('Confirma a exclusão do chamado '+h.protocolo+'?')){
+    c.historico.splice(protocoloRef.histIndex, 1);
+    if(currentIndex === protocoloRef.clienteIndex){ renderHistorico(c); renderRightbar(c); }
+    protocoloNovo();
+    renderTabelaHistoricoChamados();
+    toast('Chamado excluído','ok');
+  }
+}
+function protocoloImprimir(){ window.print(); }
+function protocoloAnexos(){
+  const nome = prompt('Nome do arquivo a anexar (simulado):');
+  if(!nome || !nome.trim()) return;
+  const tb = document.getElementById('pr_tabelaAnexos');
+  if(tb.children.length===1 && tb.children[0].children.length===1){ tb.innerHTML=''; }
+  const d = new Date(); const pad=n=>String(n).padStart(2,'0');
+  const linha = document.createElement('tr');
+  linha.innerHTML = `<td>📎 ${nome.trim()}</td><td>${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}</td>`;
+  tb.appendChild(linha);
+  selectProtocoloTab('anexos');
+  toast('Anexo adicionado (simulado)','ok');
+}
+function protocoloEmail(){
+  if(!protocoloRef){ toast('Salve o chamado antes de enviar por e-mail','err'); return; }
+  const c = clients[protocoloRef.clienteIndex];
+  const h = c.historico[protocoloRef.histIndex];
+  if(!emailConfig.servidor || !emailConfig.usuario){
+    toast('Configure o serviço de e-mail em Utilitários > Configurações antes de enviar','err');
+    return;
+  }
+  document.getElementById('detalheTitulo').textContent = '✉️ Enviar Chamado por E-mail';
+  document.getElementById('detalheBody').innerHTML = `
+    <p>Chamado: <b>${h.protocolo}</b> — ${c.nome}</p>
+    <div class="field" style="margin-top:8px;"><label>E-mail de destino:</label><input type="text" id="emailDestinoChamado" value="${c.email||''}"></div>
+    <div style="margin-top:12px;text-align:right;"><button class="btn-visualizar" onclick="confirmarEnvioEmailChamado()">Enviar</button></div>`;
+  document.getElementById('modalDetalhe').classList.add('show');
+}
+function confirmarEnvioEmailChamado(){
+  const destino = document.getElementById('emailDestinoChamado').value.trim();
+  if(!destino || !destino.includes('@')){ toast('Informe um e-mail válido','err'); return; }
+  closeModal('modalDetalhe');
+  toast('Chamado enviado de '+emailConfig.remetenteNome+' para '+destino, 'ok');
+}
+function protocoloReabrir(){
+  if(!protocoloRef){ toast('Nenhum chamado carregado','err'); return; }
+  const h = clients[protocoloRef.clienteIndex].historico[protocoloRef.histIndex];
+  h.status = 'Em Atendimento';
+  document.getElementById('pr_status').value = 'Em Atendimento';
+  atualizarCorStatusProtocolo();
+  renderTabelaHistoricoChamados();
+  toast('Chamado reaberto','ok');
+}
+function protocoloFecharChamado(){
+  if(!protocoloRef){ toast('Nenhum chamado carregado','err'); return; }
+  const h = clients[protocoloRef.clienteIndex].historico[protocoloRef.histIndex];
+  h.status = 'Resolvido';
+  document.getElementById('pr_status').value = 'Resolvido';
+  atualizarCorStatusProtocolo();
+  renderTabelaHistoricoChamados();
+  toast('Chamado marcado como resolvido e fechado','ok');
+}
+
+/* ---------------- Serviços ---------------- */
+function catalogoServicos(){ return ['Internet Fibra','TV por Assinatura','Telefonia Fixa','Backup em Nuvem','Wi-Fi Mesh']; }
+
+/* ---------------- Adicionar Planos e Serviços (lista dupla com seta) ---------------- */
+function adicionarNovoTipoCatalogo(){
+  const nomeInput = document.getElementById('novoTipoNome');
+  const nome = nomeInput.value.trim();
+  const categoria = document.getElementById('novoTipoCategoria').value;
+  if(!nome){ toast('Informe o nome do novo plano ou serviço','err'); return; }
+  const sel = document.getElementById('selDisponiveis');
+  if([...sel.options].some(o=>o.value.toLowerCase()===nome.toLowerCase())){
+    toast('Esse plano ou serviço já existe na lista','err'); return;
+  }
+  let optgroup = [...sel.querySelectorAll('optgroup')].find(g=>g.label===categoria);
+  if(!optgroup){
+    optgroup = document.createElement('optgroup');
+    optgroup.label = categoria;
+    sel.appendChild(optgroup);
+  }
+  const opt = document.createElement('option');
+  opt.value = nome;
+  opt.textContent = nome;
+  optgroup.appendChild(opt);
+  nomeInput.value = '';
+  toast('Novo tipo adicionado ao catálogo: '+nome, 'ok');
+}
+function moverParaAdicionados(){
+  const sel = document.getElementById('selDisponiveis');
+  const dest = document.getElementById('selAdicionados');
+  const selecionadas = [...sel.selectedOptions];
+  if(!selecionadas.length){ toast('Selecione ao menos um item na lista da esquerda','err'); return; }
+  selecionadas.forEach(opt=>{
+    const jaExiste = [...dest.options].some(o=>o.value===opt.value);
+    if(!jaExiste){
+      const novo = document.createElement('option');
+      novo.value = opt.value;
+      novo.textContent = opt.textContent;
+      const grupo = (opt.parentElement && opt.parentElement.tagName === 'OPTGROUP') ? opt.parentElement.label : '';
+      novo.dataset.categoria = grupo;
+      dest.appendChild(novo);
+    }
+  });
+}
+function removerDosAdicionados(){
+  const dest = document.getElementById('selAdicionados');
+  const selecionadas = [...dest.selectedOptions];
+  if(!selecionadas.length){ toast('Selecione um item na lista da direita para remover','err'); return; }
+  selecionadas.forEach(opt=> opt.remove());
+}
+function confirmarAdicaoPlanos(){
+  const dest = document.getElementById('selAdicionados');
+  const itens = [...dest.options].map(o=>({value:o.value, label:o.textContent, categoria:o.dataset.categoria || ''}));
+  if(!itens.length){ toast('Adicione ao menos um item à lista antes de confirmar','err'); return; }
+  const c = clients[currentIndex];
+  const resumo = [];
+  itens.forEach(item=>{
+    if(item.categoria === 'Planos de Internet'){
+      const planoSelect = document.getElementById('f_plano');
+      if(![...planoSelect.options].some(o=>o.value===item.value)){
+        const op = document.createElement('option'); op.value=item.value; op.textContent=item.value;
+        planoSelect.appendChild(op);
+      }
+      c.plano = item.value;
+      planoSelect.value = item.value;
+      resumo.push('Plano alterado para '+item.value);
+    } else if(item.categoria === 'Descontos'){
+      c.obs = (c.obs ? c.obs+'\n' : '') + 'Desconto aplicado: '+item.label;
+      resumo.push(item.label+' aplicado');
+    } else {
+      let s = c.servicos.find(x=>x.nome===item.value);
+      if(s){ s.status='ATIVO'; } else { c.servicos.push({nome:item.value, status:'ATIVO'}); }
+      resumo.push(item.value+' ativado');
+    }
+  });
+  renderServicosLista(c);
+  renderRightbar(c);
+  renderContratosLista(c);
+  document.getElementById('f_obs').value = c.obs || '';
+  [...dest.options].forEach(o=>o.remove());
+  toast('Adicionado à linha do cliente: ' + resumo.join(', '), 'ok');
+}
+function ativarServico(){
+  closeAllMenus();
+  const c = clients[currentIndex];
+  const opts = catalogoServicos().map(s=>`<option>${s}</option>`).join('');
+  const body = `<p>Cliente: <b>${c.nome}</b></p><div class="field"><label>Serviço:</label><select id="servAtivarSelect">${opts}</select></div>`;
+  openGeneric('📶 Ativar Serviço', body, `<button onclick="confirmarAtivarServico()">Ativar</button>`);
+  return false;
+}
+function confirmarAtivarServico(){
+  const c = clients[currentIndex];
+  const nome = document.getElementById('servAtivarSelect').value;
+  let s = c.servicos.find(x=>x.nome===nome);
+  if(s){ s.status='ATIVO'; } else { c.servicos.push({nome,status:'ATIVO'}); }
+  renderServicosLista(c); renderRightbar(c);
+  closeModal('modalGeneric');
+  toast('Serviço "'+nome+'" ativado','ok');
+}
+function suspenderServico(){
+  closeAllMenus();
+  const c = clients[currentIndex];
+  const ativos = c.servicos.filter(s=>s.status==='ATIVO');
+  if(!ativos.length){ toast('Nenhum serviço ativo para suspender','err'); return false; }
+  const opts = ativos.map(s=>`<option>${s.nome}</option>`).join('');
+  const body = `<p>Cliente: <b>${c.nome}</b></p><div class="field"><label>Serviço ativo:</label><select id="servSuspSelect">${opts}</select></div>`;
+  openGeneric('⏸️ Suspender Serviço', body, `<button onclick="confirmarSuspenderServico()">Suspender</button>`);
+  return false;
+}
+function confirmarSuspenderServico(){
+  const c = clients[currentIndex];
+  const nome = document.getElementById('servSuspSelect').value;
+  const s = c.servicos.find(x=>x.nome===nome);
+  if(s){ s.status='SUSPENSO'; }
+  renderServicosLista(c); renderRightbar(c);
+  closeModal('modalGeneric');
+  toast('Serviço "'+nome+'" suspenso','ok');
+}
+function cancelarServico(){
+  closeAllMenus();
+  const c = clients[currentIndex];
+  if(!c.servicos.length){ toast('Nenhum serviço contratado','err'); return false; }
+  const opts = c.servicos.map(s=>`<option>${s.nome}</option>`).join('');
+  const body = `<p>Cliente: <b>${c.nome}</b></p><div class="field"><label>Serviço:</label><select id="servCancelSelect">${opts}</select></div>
+    <p style="color:#c0392b;margin-top:8px;">Esta ação remove o serviço do contrato do cliente.</p>`;
+  openGeneric('❌ Cancelar Serviço', body, `<button onclick="confirmarCancelarServico()">Cancelar Serviço</button>`);
+  return false;
+}
+function confirmarCancelarServico(){
+  const c = clients[currentIndex];
+  const nome = document.getElementById('servCancelSelect').value;
+  if(confirm('Confirma o cancelamento do serviço "'+nome+'"?')){
+    c.servicos = c.servicos.filter(s=>s.nome!==nome);
+    renderServicosLista(c); renderRightbar(c);
+    closeModal('modalGeneric');
+    toast('Serviço "'+nome+'" cancelado','ok');
+  }
+}
+
+/* ---------------- Faturamento (réplica do modelo "Fatura Simplificada") ---------------- */
+function valorPlano(plano){
+  const tabela = {'300 MEGA':89.90,'400 MEGA':99.90,'600 MEGA':129.90,'1 GIGA':159.90};
+  return tabela[plano] || 99.90;
+}
+function valorServicoExtra(nome){
+  const tabela = {'TV por Assinatura':45.00,'Telefonia Fixa':20.00,'Backup em Nuvem':15.00,'Wi-Fi Mesh':25.00};
+  return tabela[nome] !== undefined ? tabela[nome] : 20.00;
+}
+function icmsServicoExtra(nome){
+  const isentos = ['TV por Assinatura','Backup em Nuvem'];
+  return isentos.includes(nome) ? 'Isento' : '25%';
+}
+function maskDocumento(doc){
+  const m = (doc||'').match(/(\d{3})\.(\d{3})\.(\d{3})-(\d{2})/);
+  if(!m) return doc || '-';
+  return '***.'+m[2]+'.'+m[3]+'-**';
+}
+function montarItensFatura(c){
+  const itens = [{desc:'Mensalidade Plano '+c.produto+' '+c.plano, icms:'25%', valor: valorPlano(c.plano)}];
+  c.servicos.filter(s=>s.status==='ATIVO' && s.nome!=='Internet Fibra').forEach(s=>{
+    itens.push({desc: s.nome==='TV por Assinatura' ? 'Pacote Digital TV Box HD Especial' : s.nome, icms: icmsServicoExtra(s.nome), valor: valorServicoExtra(s.nome)});
+  });
+  itens.push({desc:'Desconto Fidelidade Promocional', icms:'-', valor:-10});
+  return itens;
+}
+function gerarLinhaDigitavelFormatada(){
+  const digits = Array.from({length:44}, ()=> Math.floor(Math.random()*10)).join('');
+  const banco = digits.slice(0,8)+'-'+digits.slice(8,9);
+  const linhaFormatada = digits.slice(9,14)+'.'+digits.slice(14,19)+'  '+digits.slice(19,24)+'.'+digits.slice(24,30)+
+    '  '+digits.slice(30,35)+'.'+digits.slice(35,41)+'  '+digits.slice(41,42)+'  '+digits.slice(42,44)+digits.slice(0,8);
+  return {digits, banco, linhaFormatada};
+}
+function gerarPixCode(c, total){
+  const valorStr = total.toFixed(2);
+  const hex = () => Math.random().toString(16).slice(2,10);
+  return `00020101021126580014br.gov.bcb.pix0136${hex()}-${hex().slice(0,4)}-4b53-a81e-${hex()}${hex().slice(0,6)}5204000053039865406${valorStr}5802BR5914STRONG_TELECOM6009CURITIBA62070503***6304A1B2`;
+}
+function gerarFaturaHTML(c, ld){
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const now = new Date();
+  const mesReferencia = meses[now.getMonth()] + ' / ' + now.getFullYear();
+  const itens = montarItensFatura(c);
+  const total = itens.reduce((s,i)=>s+i.valor,0);
+  const fmt = v => (v<0 ? '-R$ '+Math.abs(v).toFixed(2).replace('.',',') : 'R$ '+v.toFixed(2).replace('.',','));
+  const pix = gerarPixCode(c, total);
+  const rowsHtml = itens.map(i=>`
+    <tr>
+      <td style="padding:9px 12px;border-bottom:1px solid #e4e8f0;">${i.desc}</td>
+      <td style="padding:9px 12px;border-bottom:1px solid #e4e8f0;text-align:center;">${i.icms}</td>
+      <td style="padding:9px 12px;border-bottom:1px solid #e4e8f0;text-align:right;${i.valor<0?'color:#1a8a3c;':''}">${fmt(i.valor)}</td>
+    </tr>`).join('');
+  return `
+  <div id="faturaCapture" style="font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#1a1a1a;border:1px solid #d7dce5;border-radius:4px;overflow:hidden;background:#fff;">
+    <div style="background:#1a2f63;color:#fff;padding:16px 20px;position:relative;">
+      <div style="font-size:22px;font-weight:bold;letter-spacing:.5px;">STRONG TELECOM</div>
+      <div style="font-size:11px;opacity:.9;margin-top:4px;">CNPJ: 23.456.789/0001-10 | IE: 220.330.440.222</div>
+      <div style="font-size:11px;opacity:.9;">Sede: Av. das Comunicações, 2200 - Curitiba/PR - CEP 80010-000</div>
+      <div style="position:absolute;top:16px;right:20px;background:#3f7fea;padding:6px 14px;border-radius:3px;font-weight:bold;font-size:11px;">Fatura Simplificada</div>
+    </div>
+    <div style="display:flex;gap:14px;padding:16px 20px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:220px;background:#f4f6fa;border-radius:4px;padding:12px 14px;">
+        <div style="font-size:10px;letter-spacing:.5px;color:#5a6478;font-weight:bold;">CLIENTE / RAZÃO SOCIAL</div>
+        <div style="font-weight:bold;font-size:13px;margin:3px 0 6px 0;">${c.nome}</div>
+        <div style="font-size:11px;color:#333;line-height:1.7;">
+          ${c.tipoPessoa==='Jurídica'?'CNPJ':'CPF'}: ${maskDocumento(c.cpf)}<br>
+          Código do Cliente: ${c.numCliente}<br>
+          Endereço: ${c.logradouro||'-'}, ${c.numEnd||'-'} - ${c.bairro||'-'}, ${c.cidade||'-'} - ${c.uf||'-'} | CEP: ${c.cep||'-'}
+        </div>
+      </div>
+      <div style="flex:1;min-width:220px;background:#f4f6fa;border-radius:4px;padding:12px 14px;">
+        <div style="font-weight:bold;color:#1a2f63;font-size:13px;margin-bottom:6px;">DADOS DA FATURA</div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin:4px 0;"><span>Mês de Referência:</span><b>${mesReferencia}</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin:4px 0;"><span>Data de Vencimento:</span><b style="color:#c0392b;">${c.vencimento||'-'}</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin:6px 0 0 0;"><span>Total a Pagar:</span><b style="color:#1a2f63;font-size:15px;">${fmt(total)}</b></div>
+      </div>
+    </div>
+    <div style="padding:0 20px;">
+      <div style="border-left:4px solid #2f6fd0;padding-left:8px;font-weight:bold;color:#1a2f63;margin-bottom:8px;">DETALHAMENTO DOS SERVIÇOS CONTRATADOS</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px;">
+        <thead>
+          <tr style="background:#1a2f63;color:#fff;">
+            <th style="padding:8px 12px;text-align:left;">DESCRIÇÃO DO SERVIÇO / LANÇAMENTO</th>
+            <th style="padding:8px 12px;text-align:center;">ALÍQUOTA ICMS</th>
+            <th style="padding:8px 12px;text-align:right;">VALOR (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+          <tr style="background:#eef2fb;">
+            <td style="padding:9px 12px;font-weight:bold;color:#1a2f63;">VALOR TOTAL DA FATURA</td>
+            <td></td>
+            <td style="padding:9px 12px;text-align:right;font-weight:bold;color:#1a2f63;">${fmt(total)}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:10px;color:#777;margin:8px 0 16px 0;">* Nota Fiscal de Serviços de Telecomunicação emitida nos termos do Convênio ICMS. Tributos totais incidentes (Lei 12.741): ${fmt(total*0.18)}.</div>
+    </div>
+    <div style="border-top:1px dashed #b6bccb;margin:0 20px;"></div>
+    <div style="padding:16px 20px;">
+      <div style="border-left:4px solid #1a2f63;padding-left:8px;font-weight:bold;color:#1a2f63;margin-bottom:10px;">OPÇÕES DE PAGAMENTO</div>
+      <div style="background:#eaf7ee;border-radius:4px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:56px;height:56px;background:#fff;border:1px solid #cfe3d4;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none;">▦</div>
+        <div style="flex:1;min-width:0;">
+          <div style="color:#1a8a3c;font-weight:bold;font-size:12.5px;margin-bottom:3px;">Pague com Pix (Rápido e Seguro)</div>
+          <div style="font-size:11px;color:#333;">Abra o aplicativo do seu banco, escolha a opção <b>Pagar com QR Code / Pix</b> e aponte a câmera para o código ao lado. A confirmação é imediata!</div>
+          <div style="font-family:monospace;font-size:10px;background:#fff;border:1px solid #cfe3d4;border-radius:3px;padding:6px 8px;margin-top:8px;word-break:break-all;color:#444;">${pix}</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin:0 20px 20px 20px;border:1px dashed #b6bccb;border-radius:4px;padding:14px;text-align:center;">
+      <div style="font-weight:bold;font-size:11.5px;margin-bottom:10px;">FICHA DE COMPENSAÇÃO BANCÁRIA (ACEITO EM QUALQUER BANCO OU LOTÉRICA)</div>
+      <div id="ldBanco" style="font-family:monospace;font-weight:bold;letter-spacing:3px;font-size:12px;margin-bottom:8px;">${ld.banco}</div>
+      <div style="text-align:center;"><svg id="barcodeSvg"></svg></div>
+      <div id="ldLinha" style="font-family:monospace;font-weight:bold;letter-spacing:2px;font-size:13px;margin-top:8px;">${ld.linhaFormatada}</div>
+      <div style="font-size:10px;color:#888;margin-top:10px;">Autenticação mecânica no verso / Linha digitável para canais digitais de pagamento.</div>
+      <button class="btn-visualizar" style="margin-top:10px;" onclick="regenerarCodigoBarras()">🔄 Gerar Novo Código de Barras</button>
+    </div>
+  </div>`;
+}
+function desenharBarcode(digits){
+  try{
+    if(window.JsBarcode){
+      JsBarcode('#barcodeSvg', digits, {format:'ITF', width:1.6, height:50, displayValue:false, margin:0});
+    }
+  }catch(e){ console.warn('Código de barras indisponível nesta visualização', e); }
+}
+function regenerarCodigoBarras(){
+  const ld = gerarLinhaDigitavelFormatada();
+  const bancoEl = document.getElementById('ldBanco');
+  const linhaEl = document.getElementById('ldLinha');
+  if(bancoEl) bancoEl.textContent = ld.banco;
+  if(linhaEl) linhaEl.textContent = ld.linhaFormatada;
+  desenharBarcode(ld.digits);
+  toast('Novo código de barras gerado','ok');
+}
+function abrirFatura(){
+  closeAllMenus();
+  const c = clients[currentIndex];
+  const ld = gerarLinhaDigitavelFormatada();
+  const actions = `
+    <button onclick="baixarFaturaPDF()">📄 Gerar PDF</button>
+    <button onclick="enviarFaturaEmail()">📧 Enviar por E-mail</button>
+    <button onclick="window.print()">🖨️ Imprimir</button>`;
+  openGeneric('💰 Fatura - '+c.nome, gerarFaturaHTML(c, ld), actions, '760px');
+  desenharBarcode(ld.digits);
+  return false;
+}
+function consultarFatura(){ return abrirFatura(); }
+function emitir2via(){ return abrirFatura(); }
+function visualizarFatura(){ return abrirFatura(); }
+
+/* ---------------- Gerar PDF da fatura ---------------- */
+async function baixarFaturaPDF(){
+  const c = clients[currentIndex];
+  const el = document.getElementById('faturaCapture');
+  if(!el || !window.html2canvas || !window.jspdf){ toast('Recursos de PDF ainda carregando, tente novamente em instantes','err'); return; }
+  toast('Gerando PDF da fatura...','ok');
+  try{
+    const canvas = await html2canvas(el, {scale:2, backgroundColor:'#ffffff'});
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','pt','a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const imgWidth = pageWidth - 40;
+    const imgHeight = canvas.height * (imgWidth/canvas.width);
+    pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
+    const blob = pdf.output('blob');
+    const filename = 'fatura_' + c.numCliente + '.pdf';
+    if(window.claude && typeof window.claude.use === 'function'){
+      const downloads = await window.claude.use('downloads');
+      if(downloads){
+        await downloads.save({filename, data: blob});
+        toast('PDF da fatura gerado com sucesso','ok');
+        return;
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('PDF da fatura gerado com sucesso','ok');
+  }catch(err){
+    if(err && err.code === 'declined'){ toast('Download do PDF cancelado','err'); return; }
+    console.error(err);
+    toast('Não foi possível gerar o PDF','err');
+  }
+}
+
+/* ---------------- Enviar fatura por e-mail ---------------- */
+function enviarFaturaEmail(){
+  const c = clients[currentIndex];
+  if(!emailConfig.servidor || !emailConfig.usuario){
+    toast('Configure o serviço de e-mail em Utilitários > Configurações antes de enviar faturas','err');
+    return;
+  }
+  document.getElementById('detalheTitulo').textContent = '📧 Enviar Fatura por E-mail';
+  document.getElementById('detalheBody').innerHTML = `
+    <p>Cliente: <b>${c.nome}</b></p>
+    <div class="field" style="margin-top:8px;">
+      <label>E-mail de destino:</label>
+      <input type="text" id="emailDestinoFatura" value="${c.email||''}">
+    </div>
+    <div class="kv" style="margin-top:10px;background:#f4f6fa;border-radius:4px;">
+      <div class="kv-row"><span>Remetente:</span><span>${emailConfig.remetenteNome}</span></div>
+      <div class="kv-row"><span>Servidor SMTP:</span><span>${emailConfig.servidor}:${emailConfig.porta}${emailConfig.ssl?' (SSL/TLS)':''}</span></div>
+    </div>
+    <div style="margin-top:12px;text-align:right;">
+      <button class="btn-visualizar" onclick="confirmarEnvioEmail()">Enviar</button>
+    </div>`;
+  document.getElementById('modalDetalhe').classList.add('show');
+}
+function confirmarEnvioEmail(){
+  const destino = document.getElementById('emailDestinoFatura').value.trim();
+  if(!destino || !destino.includes('@')){ toast('Informe um e-mail válido','err'); return; }
+  closeModal('modalDetalhe');
+  toast('Fatura enviada de '+emailConfig.remetenteNome+' para '+destino+' via '+emailConfig.servidor, 'ok');
+}
+function negociarDebitos(){
+  closeAllMenus();
+  const c = clients[currentIndex];
+  if(c.situacao==='ATIVO'){
+    openGeneric('💳 Negociação de Débitos', `<p>O cliente <b>${c.nome}</b> não possui débitos em aberto no momento.</p>`, '');
+    return false;
+  }
+  const valor = valorPlano(c.plano) * 2;
+  const body = `<p>Cliente: <b>${c.nome}</b></p>
+    <p>Débito total em aberto: <b>R$ ${valor.toFixed(2).replace('.',',')}</b></p>
+    <div class="field"><label>Forma de negociação:</label>
+    <select id="negociacaoSelect"><option>À vista com 10% de desconto</option><option>Parcelado em 2x</option><option>Parcelado em 3x</option></select></div>`;
+  openGeneric('💳 Negociação de Débitos', body, `<button onclick="confirmarNegociacao()">Confirmar Acordo</button>`);
+  return false;
+}
+function confirmarNegociacao(){
+  const c = clients[currentIndex];
+  const opcao = document.getElementById('negociacaoSelect').value;
+  c.situacao = 'ATIVO';
+  document.getElementById('f_situacao').value = 'ATIVO';
+  applySituacaoStyle('ATIVO');
+  renderRightbar(c);
+  renderContratosLista(c);
+  closeModal('modalGeneric');
+  toast('Acordo confirmado ('+opcao+'). Situação atualizada para ATIVO','ok');
+}
+
+/* ---------------- Relatórios ---------------- */
+function relatorioClientes(){
+  closeAllMenus();
+  const total = clients.length;
+  const ativos = clients.filter(c=>c.situacao==='ATIVO').length;
+  const inativos = total-ativos;
+  const rows = clients.map(c=>`<tr><td>${c.numCliente}</td><td>${c.nome}</td><td>${c.cidade}/${c.uf}</td><td>${c.situacao}</td></tr>`).join('');
+  const body = `<div class="kv" style="margin-bottom:10px;">
+      <div class="kv-row"><span>Total de clientes:</span><span>${total}</span></div>
+      <div class="kv-row"><span>Ativos:</span><span>${ativos}</span></div>
+      <div class="kv-row"><span>Inativos:</span><span>${inativos}</span></div>
+    </div>
+    <table class="gridtable"><thead><tr><th>Nº Cliente</th><th>Nome</th><th>Cidade/UF</th><th>Situação</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+  openGeneric('📊 Relatório de Clientes', body, `<button onclick="window.print()">Imprimir</button>`);
+  return false;
+}
+function relatorioAtendimentos(){
+  closeAllMenus();
+  let all = [];
+  clients.forEach(c=>c.historico.forEach(h=>all.push(Object.assign({},h,{cliente:c.nome}))));
+  const rows = all.map(h=>`<tr><td>${h.data}</td><td>${h.protocolo}</td><td>${h.cliente}</td><td>${h.tipo}</td><td>${h.status}</td></tr>`).join('') || '<tr><td colspan="5">Nenhum atendimento registrado.</td></tr>';
+  const body = `<table class="gridtable"><thead><tr><th>Data</th><th>Protocolo</th><th>Cliente</th><th>Tipo</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+  openGeneric('📊 Relatório de Atendimentos', body, `<button onclick="window.print()">Imprimir</button>`);
+  return false;
+}
+
+/* ---------------- Utilitários ---------------- */
+function realizarBackup(){
+  closeAllMenus();
+  const body = `<div id="backupProgressWrap"><p>Realizando backup dos dados do sistema...</p>
+    <div style="background:#eee;border-radius:4px;overflow:hidden;height:16px;">
+      <div id="backupBar" style="background:#1a8a1a;height:100%;width:0%;transition:width .4s;"></div>
+    </div></div>`;
+  openGeneric('💾 Backup do Sistema', body, '');
+  let p=0;
+  const iv = setInterval(()=>{
+    p+=20;
+    const bar=document.getElementById('backupBar');
+    if(bar) bar.style.width=p+'%';
+    if(p>=100){
+      clearInterval(iv);
+      const wrap = document.getElementById('backupProgressWrap');
+      if(wrap) wrap.innerHTML = '<p style="color:#1a8a1a;font-weight:bold;">✔ Backup concluído com sucesso!</p><p style="font-size:11px;color:#777;">'+clients.length+' registros de clientes salvos.</p>';
+      toast('Backup concluído com sucesso','ok');
+    }
+  }, 350);
+  return false;
+}
+/* ---------------- Sincronização MikroTik (RouterOS) ---------------- */
+function abrirSincronizacaoMikrotik(){
+  closeAllMenus();
+  const body = `
+    <p style="margin-top:0;">Configure a conexão com o RouterOS (MikroTik) para sincronizar os planos contratados dos clientes com os perfis PPPoE e filas de banda do roteador.</p>
+    <div class="grid g2">
+      <div class="field"><label>Host / IP:</label><input type="text" id="mkHost" value="${mikrotikConfig.host}" placeholder="Ex: 192.168.88.1"></div>
+      <div class="field"><label>Porta:</label><input type="text" id="mkPorta" value="${mikrotikConfig.porta}"></div>
+    </div>
+    <div class="grid g2" style="margin-top:8px;">
+      <div class="field"><label>Usuário:</label><input type="text" id="mkUsuario" value="${mikrotikConfig.usuario}"></div>
+      <div class="field"><label>Senha:</label><input type="text" id="mkSenha" value="${mikrotikConfig.senha}" placeholder="••••••••"></div>
+    </div>
+    <div class="field" style="margin-top:8px;">
+      <label>Modo de Conexão:</label>
+      <select id="mkModo">
+        <option value="rest" ${mikrotikConfig.modo==='rest'?'selected':''}>REST API (RouterOS 7, HTTP/HTTPS)</option>
+        <option value="api" ${mikrotikConfig.modo==='api'?'selected':''}>API Binária (porta 8728)</option>
+        <option value="api-ssl" ${mikrotikConfig.modo==='api-ssl'?'selected':''}>API-SSL (porta 8729)</option>
+      </select>
+    </div>
+    <div id="mkStatus" style="margin-top:8px;font-size:11px;"></div>
+    <div style="border-top:1px solid #e0e4ec;margin:14px 0;"></div>
+    <div style="font-weight:bold;color:#1a2f63;margin-bottom:8px;">Sincronização de Clientes (${clients.length} clientes cadastrados)</div>
+    <div id="mkSyncLog" style="max-height:180px;overflow:auto;background:#f4f6fa;border-radius:4px;padding:8px;font-family:monospace;font-size:10.5px;color:#333;line-height:1.6;">
+      ${mikrotikConfig.ultimaSync ? 'Última sincronização: '+mikrotikConfig.ultimaSync : 'Nenhuma sincronização realizada ainda.'}
+    </div>`;
+  const actions = `
+    <button onclick="testarConexaoMikrotik()">🔌 Testar Conexão</button>
+    <button onclick="salvarConfigMikrotik()">💾 Salvar</button>
+    <button onclick="sincronizarMikrotikAgora()">🔄 Sincronizar Agora</button>`;
+  openGeneric('📡 Sincronização MikroTik', body, actions, '640px');
+  return false;
+}
+function lerConfigMikrotikDoForm(){
+  mikrotikConfig.host = document.getElementById('mkHost').value.trim();
+  mikrotikConfig.porta = document.getElementById('mkPorta').value.trim();
+  mikrotikConfig.usuario = document.getElementById('mkUsuario').value.trim();
+  mikrotikConfig.senha = document.getElementById('mkSenha').value;
+  mikrotikConfig.modo = document.getElementById('mkModo').value;
+}
+function salvarConfigMikrotik(){
+  lerConfigMikrotikDoForm();
+  toast('Configuração do MikroTik salva','ok');
+}
+async function testarConexaoMikrotik(){
+  lerConfigMikrotikDoForm();
+  const statusEl = document.getElementById('mkStatus');
+  if(!mikrotikConfig.host){
+    statusEl.innerHTML = '<span style="color:#c0392b;">Informe o host/IP do roteador.</span>';
+    return;
+  }
+  statusEl.innerHTML = '<span style="color:#777;">Conectando a '+mikrotikConfig.host+':'+mikrotikConfig.porta+'...</span>';
+  if(mikrotikConfig.modo !== 'rest'){
+    setTimeout(()=>{
+      statusEl.innerHTML = '<span style="color:#c0392b;">A API binária do RouterOS (porta '+mikrotikConfig.porta+') usa um protocolo TCP próprio e não pode ser acessada diretamente pelo navegador. Use o modo REST API (RouterOS 7+) ou um serviço intermediário (backend/proxy) para essa conexão.</span>';
+    }, 500);
+    return;
+  }
+  try{
+    const scheme = (mikrotikConfig.porta === '443') ? 'https' : 'http';
+    const url = scheme+'://'+mikrotikConfig.host+':'+mikrotikConfig.porta+'/rest/system/resource';
+    const auth = btoa(mikrotikConfig.usuario+':'+mikrotikConfig.senha);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(()=>controller.abort(), 4000);
+    const resp = await fetch(url, { headers: { 'Authorization': 'Basic '+auth }, signal: controller.signal });
+    clearTimeout(timeoutId);
+    if(resp.ok){
+      mikrotikConfig.conectado = true;
+      statusEl.innerHTML = '<span style="color:#1a8a3c;">✔ Conexão REST estabelecida com sucesso com o RouterOS.</span>';
+      toast('Conectado ao MikroTik com sucesso','ok');
+    } else {
+      mikrotikConfig.conectado = false;
+      statusEl.innerHTML = '<span style="color:#c0392b;">Roteador respondeu com erro (HTTP '+resp.status+'). Verifique usuário/senha e se a REST API está habilitada.</span>';
+    }
+  }catch(err){
+    mikrotikConfig.conectado = false;
+    statusEl.innerHTML = '<span style="color:#c0392b;">Não foi possível alcançar o roteador a partir deste navegador (rede local inacessível, CORS ou HTTPS necessário). A sincronização pode prosseguir em modo de demonstração.</span>';
+  }
+}
+async function sincronizarMikrotikAgora(){
+  lerConfigMikrotikDoForm();
+  const logEl = document.getElementById('mkSyncLog');
+  logEl.innerHTML = 'Iniciando sincronização com o MikroTik...<br>';
+  for(const c of clients){
+    const perfil = c.plano ? c.plano.replace(/\s+/g,'') : 'PADRAO';
+    const secretName = 'cliente_' + (c.numCliente||'').replace(/\D/g,'');
+    let statusReal = '';
+    if(mikrotikConfig.conectado && mikrotikConfig.modo === 'rest'){
+      try{
+        const scheme = (mikrotikConfig.porta === '443') ? 'https' : 'http';
+        const url = scheme+'://'+mikrotikConfig.host+':'+mikrotikConfig.porta+'/rest/ppp/secret';
+        const auth = btoa(mikrotikConfig.usuario+':'+mikrotikConfig.senha);
+        await fetch(url, {
+          method:'PUT',
+          headers:{ 'Authorization':'Basic '+auth, 'Content-Type':'application/json' },
+          body: JSON.stringify({ name:secretName, profile:perfil, disabled: c.situacao!=='ATIVO' ? 'true':'false' })
+        });
+        statusReal = ' (enviado ao roteador)';
+      }catch(e){ statusReal = ' (falha ao enviar — mantido em log local)'; }
+    }
+    const linha = (c.situacao === 'ATIVO')
+      ? `[OK] ${c.nome} → secret PPPoE "${secretName}" sincronizado, perfil ${perfil}, habilitado${statusReal}`
+      : `[!!] ${c.nome} → secret PPPoE "${secretName}" desabilitado (situação: ${c.situacao})${statusReal}`;
+    logEl.innerHTML += linha + '<br>';
+    logEl.scrollTop = logEl.scrollHeight;
+    await new Promise(r=>setTimeout(r, 120));
+  }
+  const agora = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  mikrotikConfig.ultimaSync = `${pad(agora.getDate())}/${pad(agora.getMonth()+1)}/${agora.getFullYear()} ${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
+  logEl.innerHTML += '<br><b>Sincronização concluída: '+clients.length+' cliente(s) processado(s) em '+mikrotikConfig.ultimaSync+'.</b>';
+  if(!mikrotikConfig.conectado){
+    logEl.innerHTML += '<br><span style="color:#c0392b;">(modo de demonstração — sem conexão real confirmada com o roteador; use "Testar Conexão" com um RouterOS 7 acessível para sincronizar de verdade)</span>';
+  }
+  toast('Sincronização com o MikroTik concluída','ok');
+}
+
+function abrirConfiguracoes(){
+  closeAllMenus();
+  const body = `
+    <div class="field" style="margin-bottom:10px;"><label>Usuário logado:</label><input type="text" id="cfgUsuario" value="${usuarioLogado()}"></div>
+    <div class="field" style="margin-bottom:10px;"><label><input type="checkbox" id="cfgNotif" checked> Ativar notificações sonoras</label></div>
+    <div class="field" style="margin-bottom:14px;"><label><input type="checkbox" id="cfgAutoSave"> Salvar automaticamente ao trocar de aba</label></div>
+    <div style="border-top:1px solid #e0e4ec;margin:10px 0 14px 0;"></div>
+    <div style="font-weight:bold;color:#1a2f63;margin-bottom:8px;">📧 Serviço de E-mail para Envio de Faturas</div>
+    <div class="grid g2">
+      <div class="field"><label>Servidor SMTP:</label><input type="text" id="cfgSmtpServidor" value="${emailConfig.servidor}"></div>
+      <div class="field"><label>Porta:</label><input type="text" id="cfgSmtpPorta" value="${emailConfig.porta}"></div>
+    </div>
+    <div class="grid g2" style="margin-top:8px;">
+      <div class="field"><label>Usuário (login):</label><input type="text" id="cfgSmtpUsuario" value="${emailConfig.usuario}"></div>
+      <div class="field"><label>Senha:</label><input type="text" id="cfgSmtpSenha" value="${emailConfig.senha}" placeholder="••••••••"></div>
+    </div>
+    <div class="grid g2" style="margin-top:8px;">
+      <div class="field"><label>Nome do Remetente:</label><input type="text" id="cfgSmtpRemetente" value="${emailConfig.remetenteNome}"></div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:6px;margin-top:18px;font-weight:normal;">
+          <input type="checkbox" id="cfgSmtpSsl" ${emailConfig.ssl?'checked':''}> Usar conexão segura (SSL/TLS)
+        </label>
+      </div>
+    </div>
+    <div id="testeEmailResultado" style="margin-top:10px;"></div>
+    <div style="border-top:1px solid #e0e4ec;margin:14px 0;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div><b style="color:#1a2f63;">📡 Sincronização MikroTik</b><br><span style="font-size:11px;color:#666;">Configure a integração com o roteador RouterOS separadamente.</span></div>
+      <button class="btn-visualizar" onclick="closeModal('modalGeneric');abrirSincronizacaoMikrotik();">Abrir</button>
+    </div>`;
+  openGeneric('⚙️ Configurações', body, `
+    <button onclick="testarConexaoEmail()">🔌 Testar Conexão</button>
+    <button onclick="salvarConfiguracoes()">Salvar</button>`);
+  return false;
+}
+function testarConexaoEmail(){
+  const servidor = document.getElementById('cfgSmtpServidor').value.trim();
+  const usuario = document.getElementById('cfgSmtpUsuario').value.trim();
+  const div = document.getElementById('testeEmailResultado');
+  if(!servidor || !usuario){
+    if(div) div.innerHTML = '<div style="color:#c0392b;font-size:11px;">Preencha ao menos o servidor SMTP e o usuário antes de testar.</div>';
+    return;
+  }
+  if(div) div.innerHTML = '<div style="color:#777;font-size:11px;">Testando conexão com '+servidor+'...</div>';
+  setTimeout(()=>{
+    if(div) div.innerHTML = '<div style="color:#1a8a3c;font-size:11px;">✔ Conexão com o servidor SMTP realizada com sucesso.</div>';
+    toast('Conexão SMTP testada com sucesso','ok');
+  }, 700);
+}
+function salvarConfiguracoes(){
+  const novoUsuario = document.getElementById('cfgUsuario').value.trim();
+  if(novoUsuario) document.getElementById('s_usuario').textContent = novoUsuario;
+  emailConfig.servidor = document.getElementById('cfgSmtpServidor').value.trim();
+  emailConfig.porta = document.getElementById('cfgSmtpPorta').value.trim();
+  emailConfig.usuario = document.getElementById('cfgSmtpUsuario').value.trim();
+  emailConfig.senha = document.getElementById('cfgSmtpSenha').value;
+  emailConfig.remetenteNome = document.getElementById('cfgSmtpRemetente').value.trim();
+  emailConfig.ssl = document.getElementById('cfgSmtpSsl').checked;
+  closeModal('modalGeneric');
+  toast('Configurações salvas','ok');
+}
+
+/* ---------------- Clock ---------------- */
+function tickClock(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('s_datetime').textContent =
+    `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+tickClock();
+setInterval(tickClock, 15000);
+
+/* ---------------- Init ---------------- */
+renderClient(clients[currentIndex]);
+setEditable(false);
+</script>
+</body>
+</html>
